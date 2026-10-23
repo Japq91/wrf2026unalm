@@ -1,0 +1,48 @@
+# Datos y artefactos generados por los notebooks del curso (no versionar).
+# Alcance limitado a src/**: los datos reales curados en data/ (ver abajo)
+# sí deben versionarse, aunque también sean .nc/.grib2/.gif.
+src/**/*.nc
+src/**/*.grib2
+src/**/*.grib
+src/**/*.grib2.*.idx
+src/**/*.gif
+proyecto_demo/
+
+# FNL global real (GDEX/NCAR): ~500 MB cada archivo, no se versiona.
+# No existe en el repositorio -- se descarga en clase con
+# data/descarga_FNL.csh AAAAMMDD (ver Módulo 3, Día 4). El .idx que genera
+# cfgrib al abrirlo tampoco se versiona (es cache local, inútil sin el
+# .grib2 que indexa).
+data/gdas1.fnl*.grib2
+data/gdas1.fnl*.grib2.*.idx
+
+# Datos reales completos (proyecto bigua): demasiado pesados para git
+# (wrfout ~1 GB c/u, excede el límite duro de 100 MB/archivo de GitHub).
+# Quedan solo en esta máquina. El subconjunto recortado y real en
+# data/grid_muestra/ sí se versiona — es el que usan los notebooks.
+data/grid/
+data/ogimet/peru/
+data/ogimet/area_wrf/
+
+# Jupyter
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# Entorno / sistema
+.DS_Store
+
+# Documentos administrativos confidenciales (TDR, informe final, registros
+# de sesiones): sección 6 de los TDR, no se publican.
+*TDR*.pdf
+LENGUAJE DE PROGRAMACION*.pdf
+docs_privados/
+docente/
+
+# Salidas que generan los notebooks al ejecutarse (mapas, diagramas, tablas).
+src/**/notebooks/*.png
+src/**/notebooks/validacion_*.csv
+src/**/notebooks/ceres_como_se_descargo.csv

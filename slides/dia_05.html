@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Día 5 — Integridad y preprocesamiento (Módulo 3)</title>
+<style>
+:root {
+  --azul-950: #0a1f33;
+  --azul-900: #0d2b4a;
+  --azul-800: #123a63;
+  --azul-700: #1a4d82;
+  --azul-600: #2563a3;
+  --teal-400: #2dd4bf;
+  --teal-300: #5eead4;
+  --ambar-400: #f5a623;
+  --ambar-300: #f8c471;
+  --rojo-400: #f2555a;
+  --verde-400: #4ade80;
+  --gris-100: #f4f6f8;
+  --gris-200: #e6eaee;
+  --gris-400: #9aa7b4;
+  --gris-600: #5b6b7a;
+  --texto: #10202f;
+  --blanco: #ffffff;
+  --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  font-family: var(--fuente);
+  background: var(--azul-950);
+  color: var(--texto);
+  overflow: hidden;
+}
+.deck { position: relative; width: 100vw; height: 100vh; }
+.slide {
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--blanco);
+  padding: 4.2vh 6vw 3vh 6vw;
+}
+.slide.active { display: flex; }
+.slide-kicker {
+  font-size: 1.65vw; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--azul-600); font-weight: 700; margin-bottom: .6vh;
+}
+.slide h1 { font-size: 3.6vw; line-height: 1.12; margin: 0 0 1.2vh 0; color: var(--azul-950); }
+.slide h2 { font-size: 2.7vw; line-height: 1.2; margin: 0 0 1.6vh 0; color: var(--azul-950); }
+.slide h3 { font-size: 1.95vw; margin: 0 0 1vh 0; color: var(--azul-700); }
+.slide p.lead { font-size: 1.9vw; color: var(--gris-600); margin: 0 0 1.4vh 0; }
+.bullets { font-size: 1.9vw; line-height: 1.42; color: var(--texto); margin: 0; padding-left: 1.2em; }
+.bullets li { margin-bottom: .45em; }
+.bullets ul { margin-top: .3em; font-size: .86em; color: var(--gris-600); }
+.slide-body { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; justify-content: center; }
+.slide-body.top { justify-content: flex-start; }
+
+/* --- tipos de slide --- */
+.slide--title { background: linear-gradient(135deg, var(--azul-950), var(--azul-800) 60%, var(--azul-700)); color: var(--blanco); justify-content: center; align-items: flex-start; }
+.slide--title .day-badge { font-size: 1.75vw; color: var(--teal-300); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1.4vh; }
+.slide--title h1 { color: var(--blanco); font-size: 4.1vw; max-width: 90%; }
+.slide--title p.lead { color: #cfe0ee; font-size: 2vw; max-width: 70%; }
+.slide--title .meta-row { display: flex; gap: 2.2vw; margin-top: 3vh; }
+.slide--title .meta-item { font-size: 1.4vw; color: var(--teal-300); border-left: 3px solid var(--teal-400); padding-left: .8em; }
+.slide--title .meta-item b { display: block; color: var(--blanco); font-size: 1.7vw; }
+
+.slide--section { background: var(--azul-900); color: var(--blanco); justify-content: center; }
+.slide--section .num { font-size: 6vw; font-weight: 800; color: var(--teal-400); opacity: .5; line-height: 1; }
+.slide--section h2 { color: var(--blanco); font-size: 3.05vw; margin-top: 1vh; }
+.slide--section p.lead { color: #cfe0ee; font-size: 1.9vw; }
+
+.slide--recap { background: var(--gris-100); }
+.slide--recap .slide-kicker { color: var(--ambar-400); }
+.slide--recap h2::before { content: "↺ "; color: var(--ambar-400); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5vw; flex: 1; align-items: start; }
+.two-col.wide-left { grid-template-columns: 1.3fr 1fr; }
+.two-col.wide-right { grid-template-columns: 1fr 1.3fr; }
+.col-box { background: var(--gris-100); border-radius: 14px; padding: 1.6vh 1.6vw; }
+.col-box h3 { margin-top: 0; }
+.col-box.acc-teal { border-left: 6px solid var(--teal-400); }
+.col-box.acc-ambar { border-left: 6px solid var(--ambar-400); }
+.col-box.acc-rojo { border-left: 6px solid var(--rojo-400); }
+.col-box.acc-azul { border-left: 6px solid var(--azul-600); }
+
+.slide--image .img-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.slide--image img { max-width: 100%; max-height: 54vh; border-radius: 10px; box-shadow: 0 6px 30px rgba(10,31,51,.25); border: 1px solid var(--gris-200); }
+.caption { text-align: center; font-size: 1.45vw; color: var(--gris-600); margin-top: 1.2vh; }
+
+pre.code-block {
+  background: var(--azul-950); color: #d8e6f2; border-radius: 12px;
+  padding: 1.6vh 1.6vw; font-family: var(--mono); font-size: 1.65vw;
+  line-height: 1.45; overflow: auto; margin: 0;
+}
+pre.code-block .c1 { color: var(--gris-400); font-style: italic; }
+pre.code-block .kw { color: var(--teal-300); }
+pre.code-block .st { color: var(--ambar-300); }
+pre.code-block .fn { color: #9cd3ff; }
+
+.formula-box {
+  background: var(--gris-100); border: 1px solid var(--gris-200); border-radius: 12px;
+  padding: 1.6vh 2vw; text-align: center; font-size: 2.2vw; color: var(--azul-950);
+  font-family: "Cambria Math", Georgia, serif; margin: 1vh 0;
+}
+.formula-box.big { font-size: 2.6vw; }
+
+.badge { display: inline-block; padding: .25em .8em; border-radius: 999px; font-size: 1.4vw; font-weight: 700; }
+.badge.teal { background: rgba(45,212,191,.15); color: #0f766e; }
+.badge.ambar { background: rgba(245,166,35,.16); color: #92600a; }
+.badge.rojo { background: rgba(242,85,90,.14); color: #a3181c; }
+
+.slide--check { background: var(--azul-900); color: var(--blanco); align-items: center; justify-content: center; text-align: center; }
+.slide--check .icon { font-size: 4vw; margin-bottom: 1vh; }
+.slide--check h2 { color: var(--blanco); font-size: 2.9vw; max-width: 84%; margin: 0 auto 1.4vh auto; }
+.slide--check p.lead { color: var(--teal-300); max-width: 80%; margin: 0 auto; font-size: 1.8vw; }
+.slide--check .hint { margin-top: 2.4vh; font-size: 1.45vw; color: var(--gris-400); max-width: 80%; margin-left: auto; margin-right: auto; }
+
+.slide--quote { background: linear-gradient(135deg, var(--teal-400), #17a394); color: var(--azul-950); align-items: center; justify-content: center; text-align: center; }
+.slide--quote blockquote { font-size: 2.9vw; font-weight: 700; line-height: 1.28; max-width: 84%; margin: 0 auto; }
+.slide--quote .context { font-size: 1.65vw; font-weight: 500; max-width: 76%; margin: 1.6vh auto 0 auto; opacity: .92; }
+.slide--quote .attrib { margin-top: 2vh; font-size: 1.5vw; opacity: .8; }
+
+.slide--transition { background: linear-gradient(135deg, var(--ambar-400), #e08a1a); color: var(--azul-950); justify-content: center; }
+.slide--transition .icon { font-size: 3.4vw; }
+.slide--transition h2 { color: var(--azul-950); font-size: 3.05vw; }
+.slide--transition .practice-list { font-size: 1.75vw; }
+.slide--transition code { background: rgba(10,31,51,.12); padding: .1em .4em; border-radius: 6px; }
+
+table.cmp { width: 100%; border-collapse: collapse; font-size: 1.6vw; }
+table.cmp th { background: var(--azul-900); color: var(--blanco); padding: .6em .8em; text-align: left; }
+table.cmp td { padding: .55em .8em; border-bottom: 1px solid var(--gris-200); vertical-align: top; }
+table.cmp tr:nth-child(even) td { background: var(--gris-100); }
+
+.tag-row { display: flex; gap: .6vw; flex-wrap: wrap; margin-top: 1vh; }
+.tag { background: var(--gris-100); border: 1px solid var(--gris-200); border-radius: 8px; padding: .3em .7em; font-family: var(--mono); font-size: 1.4vw; }
+
+.acronym { border-bottom: 1px dotted var(--gris-400); cursor: help; }
+
+/* --- chrome de navegación --- */
+.chrome { position: fixed; left: 0; right: 0; bottom: 0; height: 5.4vh; display: flex; align-items: center;
+  padding: 0 1.6vw; background: rgba(10,31,51,.92); backdrop-filter: blur(4px); z-index: 50; gap: 1vw; }
+.chrome .title { color: #9db4c8; font-size: 1.2vw; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chrome button { background: var(--azul-700); color: var(--blanco); border: none; border-radius: 8px;
+  padding: .5em 1em; font-size: 1.3vw; cursor: pointer; font-weight: 600; }
+.chrome button:hover { background: var(--teal-400); color: var(--azul-950); }
+.chrome .counter { color: var(--teal-300); font-family: var(--mono); font-size: 1.2vw; min-width: 4.5em; text-align: center; }
+.progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--teal-400); z-index: 60; transition: width .25s ease; }
+.slide { padding-bottom: 6.4vh; }
+
+@media print {
+  .chrome, .progress { display: none; }
+  .slide { position: relative; display: flex !important; page-break-after: always; height: 100vh; }
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress" style="width:0%"></div>
+<div class="deck">
+<section class="slide slide--title">
+  <div class="day-badge">Clase 5 de 10 · Módulo 3 · Día 2 de 2</div>
+  <h1>Verificación de integridad y preprocesamiento</h1>
+  <p class="lead">Curso Intermedio de Python Aplicado para el WRF</p>
+  <div class="meta-row"><div class='meta-item'><b>Teoría</b>2 h</div><div class='meta-item'><b>Práctica</b>3 h</div><div class='meta-item'><b>Entorno</b>wrf2026</div></div>
+</section>
+<section class="slide slide--recap">
+  <div class='slide-kicker'>Repaso del Día 4 · 3 minutos, sin nota</div>
+  <h2>¿Lo recuerdas?</h2>
+  <div class="slide-body top"><ol class='bullets'>
+<li>Quiero reproducir una lluvia de marzo de 2023: ¿ERA5 o GFS?</li>
+<li>Mi pedido a <code>cdsapi</code> lleva 3 minutos esperando. ¿Está mal?</li>
+<li>¿Qué es <code>fxx=6</code> en GFS?</li>
+</ol><p class="caption" style="margin-top:4vh">Claves: 1) ERA5: el evento ya pasó · 2) no: está en la fila del servidor · 3) lo que el modelo calcula 6 horas después de la corrida</p></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Antes de empezar</div>
+  <h2>Activar el entorno</h2>
+  
+  <div class="slide-body top"><pre class="code-block">conda activate wrf2026
+jupyter lab</pre></div>
+</section>
+<section class="slide slide--quote">
+  <blockquote>Una descarga puede <em>terminar</em> sin haber tenido éxito.</blockquote>
+  <p class='context'>"Terminar" en el sentido de que el proceso deja de ejecutarse, sin arrojar ningún error visible — pero el archivo resultante puede estar incompleto, corrupto, o no ser el que se pidió.</p>
+  <div class="attrib">Hoy aprendemos a no confiar en que "se ve bien" sea suficiente criterio.</div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">1</div>
+    <h2>Qué significa "integridad"</h2>
+    <p class="lead">Tres controles en capas: barato primero, costoso después</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Formas de fallar sin que se note</div>
+  <h2>Descargas que "terminan" mal</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>Una conexión interrumpida deja un archivo <strong>truncado</strong>.</li>
+<li>Una solicitud mal formada devuelve un archivo de <strong>error</strong>, no datos.</li>
+<li>Una variable solicitada simplemente <strong>no existe</strong> en la fuente para esa fecha.</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Verificación en capas</div>
+  <h2>Tres controles encadenados</h2>
+  <div class="two-col wide-right"><div class="col-box acc-azul"><h3>1. Tamaño y existencia</h3><ul class='bullets'>
+<li>El archivo existe y su tamaño supera un umbral mínimo razonable</li>
+</ul></div><div class="col-box acc-teal"><h3>2. Apertura sin error</h3><ul class='bullets'>
+<li>Abre con Xarray/cfgrib sin excepción — un archivo truncado falla aquí</li>
+</ul></div></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>El tercer control</div>
+  <h2>3. Cobertura esperada</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>Las dimensiones del <code>Dataset</code> resultante (fechas, área, variables) coinciden con lo solicitado.</li>
+<li>Si se pidieron 7 días y el archivo solo cubre 3, algo falló silenciosamente en la solicitud.</li>
+<li>El orden importa: primero lo rápido (mirar si existe y cuánto pesa), al final lo lento (abrirlo y revisar su contenido).</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Los mismos controles, otro tipo de archivo</div>
+  <h2>¿Y un CSV de estaciones (SENAMHI)?</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li><strong>1. Existe y pesa algo:</strong> igual que con un NetCDF.</li>
+<li><strong>2. Se lee bien:</strong> un CSV casi nunca da error al abrirlo. El peligro es que las filas tengan más o menos valores que el encabezado y las columnas queden <strong>corridas</strong>.</li>
+<li><strong>3. Trae lo pedido:</strong> un mes tiene 24 × días horas. ¿Cuántas faltan? ¿Cuántas dicen <code>S/D</code>?</li>
+</ul></div>
+</section>
+<section class="slide slide--check">
+  <div class="icon">🧭</div>
+  <h2>Pandas leyó el archivo de Ceres sin ningún error. La humedad dice 27.74 %. ¿Le creemos?</h2>
+  <p class="lead">Un caso real de este curso: Ceres no tiene sensor de humedad.</p>
+  <div class='hint'>No: el encabezado traía 9 nombres y las filas 8 valores. La «humedad» es en realidad la dirección del viento. Pandas no avisa; el control 2 sí.</div>
+</section>
+<section class="slide slide--check">
+  <div class="icon">🔎</div>
+  <h2>Al bajar un programa, a veces se compara su “huella digital” (<em>checksum</em>). ¿Por qué aquí no?</h2>
+  <p class="lead">Piensen con qué la compararíamos.</p>
+  <div class='hint'>Ni el CDS ni los depósitos de GFS publican esa huella de forma simple: no hay con qué comparar. Por eso revisamos el archivo nosotros mismos.</div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>En código</div>
+  <h2>verificar_integridad(archivo, cobertura_esperada)</h2>
+  
+  <div class="slide-body top"><pre class="code-block"><span class="kw">def</span> <span class="fn">verificar_integridad</span>(archivo, cobertura_esperada=<span class="kw">None</span>):
+    <span class="kw">if</span> <span class="kw">not</span> os.path.exists(archivo):
+        <span class="kw">return</span> <span class="kw">False</span>, "no existe"
+    <span class="kw">if</span> os.path.getsize(archivo) &lt; 1024:
+        <span class="kw">return</span> <span class="kw">False</span>, "sospechosamente pequeño"
+    <span class="kw">try</span>:
+        ds = xr.open_dataset(archivo)
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        <span class="kw">return</span> <span class="kw">False</span>, <span class="fn">str</span>(e)
+    <span class="c1"># ... verificar cobertura ...</span>
+    <span class="kw">return</span> <span class="kw">True</span>, "OK" </pre></div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">2</div>
+    <h2>Por qué normalizar a un mismo formato</h2>
+    <p class="lead">GFS llega en GRIB2, ERA5 puede pedirse en GRIB o NetCDF</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Conveniencia, no requisito del WRF</div>
+  <h2>Convertir todo a NetCDF apenas se descarga</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>Si cada script tuviera que saber leer NetCDF <strong>y</strong> GRIB, todo sería el doble de complicado. Con un solo formato, Python trabaja siempre igual.</li>
+<li><strong>Ojo:</strong> es una comodidad para el análisis en Python del curso, <strong>no</strong> algo que el WRF exija.</li>
+<li>El WRF tiene su propio preprocesador (<strong>WPS</strong>), que lee GRIB directamente.</li>
+</ul></div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">3</div>
+    <h2>Organización de archivos</h2>
+    <p class="lead">Una convención simple que se retoma en el Módulo 6</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Convención de nombres</div>
+  <h2>Codificar fuente y rango temporal en la ruta</h2>
+  
+  <div class="slide-body top"><pre class="code-block">datos/entrada/era5/2026-01-15_2026-01-21.nc
+datos/entrada/gfs/2026-07-20_f06.nc</pre></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Por qué importa</div>
+  <h2>Evitar sobrescrituras silenciosas</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>Un nombre genérico (<code>datos.nc</code>) se sobrescribe entre descargas distintas sin avisar — si hoy se descarga ERA5 de enero y mañana de febrero, ambas veces a <code>datos.nc</code>, la segunda descarga borra la primera sin que nadie lo note.</li>
+<li>Codificar fuente + rango temporal en la ruta hace que cada archivo sea identificable de un vistazo, incluso meses después, sin tener que abrirlo para saber qué contiene.</li>
+</ul></div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">4</div>
+    <h2>Encadenar descarga → verificación → conversión</h2>
+    <p class="lead">Una función que llama a las otras, en orden</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>obtener_entrada_wrf()</div>
+  <h2>Las tres etapas en una sola función</h2>
+  
+  <div class="slide-body top"><pre class="code-block"><span class="kw">def</span> <span class="fn">obtener_entrada_wrf</span>(fecha_inicio, fecha_fin, area, variables, carpeta):
+    <span class="kw">try</span>:
+        destino = descargar_era5(fecha_inicio, fecha_fin, area, variables, ...)
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        <span class="kw">return</span> <span class="kw">False</span>, <span class="fn">f</span>"Falló la descarga: {e}"
+
+    ok, msg = verificar_integridad(destino, ...)
+    <span class="kw">return</span> (<span class="kw">True</span>, destino) <span class="kw">if</span> ok <span class="kw">else</span> (<span class="kw">False</span>, msg)</pre></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Manejo de errores</div>
+  <h2>try/except en vez de un fallo críptico</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li><code>try</code>: «intenta esto». <code>except</code>: «si falla, haz esto otro» (por ejemplo, avisar) en vez de detener todo con un mensaje incomprensible.</li>
+<li>Cada etapa dice con claridad si falló y por qué.</li>
+<li>Es lo mismo del Módulo 1 (funciones, <code>if</code>/<code>return</code>), ahora en un caso real.</li>
+</ul></div>
+</section>
+<section class="slide slide--check">
+  <div class="icon">🧩</div>
+  <h2>Checkpoint de cierre del Módulo 3</h2>
+  <p class="lead">Para "simular una helada en la sierra sur la próxima semana" — ¿qué fuente corresponde y por qué?</p>
+  <div class='hint'>Evento futuro → GFS/Herbie. Evento ya ocurrido → ERA5/cdsapi.</div>
+</section>
+<section class="slide slide--transition">
+  <div class="icon">💻</div>
+  <h2>Pasamos a la práctica (3 h)</h2>
+  <p class="lead">Notebooks: 03_practica_dia5_integridad.ipynb y 04_entregable_integrador.ipynb</p>
+  <div class="slide-body top"><ol class="practice-list"><li><strong>Implementar</strong> <code>verificar_integridad()</code> con los tres controles.</li><li><strong>Provocar 4 fallos reales</strong> — uno por cada control (truncado, cobertura insuficiente, archivo casi vacío, ruta inexistente).</li><li><strong>Integridad de un CSV de SENAMHI</strong> — <code>verificar_csv_senamhi()</code>: horas que faltan, <code>S/D</code> y columnas corridas.</li><li><strong>Conversión y organización</strong> — GFS, ERA5 <strong>y FNL</strong> (las 3 fuentes de modelo) → NetCDF, + reverificar integridad de lo ya organizado.</li><li><strong>Función integradora</strong> <code>obtener_entrada_wrf()</code>, ejecutada de punta a punta sobre un caso nuevo.</li><li><strong>Extensión opcional, no evaluada</strong> (<code>05_extension_opcional_peru.ipynb</code>) — aplicar <code>obtener_entrada_wrf()</code> a un caso nuevo real: ERA5-Land para el área de las 7 estaciones de Perú.</li></ol></div>
+</section>
+<!-- bitacora -->
+<section class="slide">
+  <div class='slide-kicker'>Cierre del día 5 · 2 minutos</div>
+  <h2>Bitácora de la sesión</h2>
+  <div class="two-col wide-left"><div class="col-box acc-teal"><h3>Antes de irte</h3><ul class='bullets'>
+<li>Escanea el código o abre el enlace: el <strong>Día 5</strong> ya viene marcado.</li>
+<li>La primera vez completa «Tus datos»; luego solo el registro del día.</li>
+<li>Cuenta en una línea qué te costó y si se resolvió: con eso ajustamos la próxima clase.</li>
+</ul><p class="caption" style="word-break:break-all">https://claude.ai/artifact/FDdSaVQn2rjyJGG1HX1VfQ#d05</p></div><div class="col-box" style="display:flex;justify-content:center;align-items:center;background:#ffffff"><svg width="222" height="222" class="segno"><g transform="scale(6)"><path fill="#fff" d="M0 0h37v37h-37z"/><path class="qrline" stroke="#0b1f33" d="M2 2.5h7m3 0h1m1 0h2m2 0h1m1 0h3m2 0h1m2 0h7m-33 1h1m5 0h1m3 0h1m1 0h4m5 0h1m2 0h1m1 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m1 0h3m1 0h2m3 0h2m4 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m5 0h3m1 0h1m1 0h1m5 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m2 0h1m3 0h1m1 0h3m1 0h2m3 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m1 0h1m3 0h1m1 0h3m1 0h1m2 0h2m1 0h1m1 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-25 1h1m1 0h1m4 0h1m5 0h2m1 0h1m-25 1h1m1 0h5m3 0h2m2 0h2m1 0h1m2 0h1m2 0h2m1 0h5m-30 1h1m1 0h1m1 0h1m1 0h1m2 0h1m3 0h3m1 0h4m1 0h1m2 0h2m1 0h3m-32 1h3m1 0h1m1 0h1m3 0h3m2 0h1m2 0h1m2 0h1m4 0h1m1 0h1m1 0h2m-32 1h1m1 0h1m4 0h1m2 0h1m1 0h1m1 0h1m1 0h1m1 0h2m1 0h2m2 0h1m2 0h3m1 0h1m-30 1h2m1 0h2m1 0h1m1 0h2m2 0h1m2 0h1m1 0h3m1 0h2m2 0h2m1 0h1m-32 1h2m2 0h2m1 0h4m2 0h4m1 0h2m2 0h1m7 0h3m-32 1h3m1 0h3m1 0h1m3 0h1m3 0h1m4 0h1m2 0h7m-31 1h1m2 0h2m2 0h4m1 0h1m2 0h1m1 0h1m1 0h2m2 0h7m-28 1h1m2 0h1m2 0h2m1 0h1m4 0h1m2 0h1m1 0h1m2 0h1m1 0h2m3 0h1m-31 1h2m1 0h1m2 0h1m1 0h4m1 0h7m1 0h1m2 0h2m1 0h3m-32 1h1m1 0h2m2 0h1m1 0h2m1 0h1m1 0h1m1 0h3m2 0h1m1 0h1m3 0h3m1 0h2m-32 1h2m2 0h1m2 0h1m2 0h1m2 0h2m1 0h3m2 0h1m2 0h1m1 0h6m-26 1h1m1 0h1m1 0h2m1 0h1m2 0h1m5 0h1m2 0h1m1 0h3m-30 1h1m2 0h1m1 0h1m3 0h4m2 0h1m2 0h4m1 0h2m4 0h1m2 0h1m-33 1h1m2 0h1m2 0h3m3 0h5m1 0h1m1 0h2m5 0h2m2 0h1m-32 1h1m1 0h1m4 0h2m1 0h1m1 0h1m2 0h1m3 0h1m1 0h3m1 0h3m2 0h2m-32 1h1m4 0h3m1 0h3m2 0h2m1 0h1m4 0h1m1 0h6m1 0h1m-24 1h7m3 0h4m2 0h1m3 0h1m1 0h1m1 0h1m-33 1h7m3 0h1m1 0h4m2 0h1m1 0h1m1 0h3m1 0h1m1 0h1m1 0h2m-32 1h1m5 0h1m1 0h2m2 0h1m2 0h2m2 0h3m1 0h2m3 0h5m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m2 0h1m2 0h2m1 0h2m1 0h6m-30 1h1m1 0h3m1 0h1m1 0h5m2 0h2m2 0h1m2 0h1m1 0h2m2 0h1m1 0h3m-33 1h1m1 0h3m1 0h1m1 0h4m1 0h1m3 0h2m1 0h2m1 0h1m2 0h2m-28 1h1m5 0h1m2 0h3m1 0h2m1 0h1m4 0h2m1 0h2m2 0h3m-31 1h7m1 0h2m2 0h2m2 0h2m5 0h5m1 0h1m1 0h1"/></g></svg></div></div>
+</section>
+</div>
+<div class="chrome">
+  <button id="prev">&larr;</button>
+  <button id="next">&rarr;</button>
+  <div class="counter" id="counter">1 / 1</div>
+  <div class="title">Día 5 — Integridad y preprocesamiento (Módulo 3)</div>
+</div>
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var idx = 0;
+  function show(i){
+    if (i < 0) i = 0;
+    if (i >= slides.length) i = slides.length - 1;
+    slides[idx].classList.remove('active');
+    idx = i;
+    slides[idx].classList.add('active');
+    document.getElementById('counter').textContent = (idx+1) + ' / ' + slides.length;
+    document.getElementById('progress').style.width = (100*(idx+1)/slides.length) + '%';
+    location.hash = 's' + (idx+1);
+  }
+  document.getElementById('next').onclick = function(){ show(idx+1); };
+  document.getElementById('prev').onclick = function(){ show(idx-1); };
+  window.addEventListener('keydown', function(e){
+    if (['ArrowRight','PageDown',' '].includes(e.key)) { show(idx+1); e.preventDefault(); }
+    else if (['ArrowLeft','PageUp'].includes(e.key)) { show(idx-1); e.preventDefault(); }
+    else if (e.key === 'Home') { show(0); }
+    else if (e.key === 'End') { show(slides.length-1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  document.querySelectorAll('.slide').forEach(function(s, i){
+    s.addEventListener('click', function(ev){
+      if (ev.target.closest('a') || ev.target.closest('.chrome')) return;
+      var rect = s.getBoundingClientRect();
+      var x = ev.clientX - rect.left;
+      if (x > rect.width/2) show(idx+1); else show(idx-1);
+    });
+  });
+  var startHash = location.hash;
+  if (startHash && /^#s\d+$/.test(startHash)) {
+    show(parseInt(startHash.slice(2),10)-1);
+  } else {
+    show(0);
+  }
+})();
+</script>
+</body>
+</html>

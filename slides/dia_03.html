@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Día 3 — Formatos de datos atmosféricos (Módulo 2)</title>
+<style>
+:root {
+  --azul-950: #0a1f33;
+  --azul-900: #0d2b4a;
+  --azul-800: #123a63;
+  --azul-700: #1a4d82;
+  --azul-600: #2563a3;
+  --teal-400: #2dd4bf;
+  --teal-300: #5eead4;
+  --ambar-400: #f5a623;
+  --ambar-300: #f8c471;
+  --rojo-400: #f2555a;
+  --verde-400: #4ade80;
+  --gris-100: #f4f6f8;
+  --gris-200: #e6eaee;
+  --gris-400: #9aa7b4;
+  --gris-600: #5b6b7a;
+  --texto: #10202f;
+  --blanco: #ffffff;
+  --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  font-family: var(--fuente);
+  background: var(--azul-950);
+  color: var(--texto);
+  overflow: hidden;
+}
+.deck { position: relative; width: 100vw; height: 100vh; }
+.slide {
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--blanco);
+  padding: 4.2vh 6vw 3vh 6vw;
+}
+.slide.active { display: flex; }
+.slide-kicker {
+  font-size: 1.65vw; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--azul-600); font-weight: 700; margin-bottom: .6vh;
+}
+.slide h1 { font-size: 3.6vw; line-height: 1.12; margin: 0 0 1.2vh 0; color: var(--azul-950); }
+.slide h2 { font-size: 2.7vw; line-height: 1.2; margin: 0 0 1.6vh 0; color: var(--azul-950); }
+.slide h3 { font-size: 1.95vw; margin: 0 0 1vh 0; color: var(--azul-700); }
+.slide p.lead { font-size: 1.9vw; color: var(--gris-600); margin: 0 0 1.4vh 0; }
+.bullets { font-size: 1.9vw; line-height: 1.42; color: var(--texto); margin: 0; padding-left: 1.2em; }
+.bullets li { margin-bottom: .45em; }
+.bullets ul { margin-top: .3em; font-size: .86em; color: var(--gris-600); }
+.slide-body { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; justify-content: center; }
+.slide-body.top { justify-content: flex-start; }
+
+/* --- tipos de slide --- */
+.slide--title { background: linear-gradient(135deg, var(--azul-950), var(--azul-800) 60%, var(--azul-700)); color: var(--blanco); justify-content: center; align-items: flex-start; }
+.slide--title .day-badge { font-size: 1.75vw; color: var(--teal-300); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1.4vh; }
+.slide--title h1 { color: var(--blanco); font-size: 4.1vw; max-width: 90%; }
+.slide--title p.lead { color: #cfe0ee; font-size: 2vw; max-width: 70%; }
+.slide--title .meta-row { display: flex; gap: 2.2vw; margin-top: 3vh; }
+.slide--title .meta-item { font-size: 1.4vw; color: var(--teal-300); border-left: 3px solid var(--teal-400); padding-left: .8em; }
+.slide--title .meta-item b { display: block; color: var(--blanco); font-size: 1.7vw; }
+
+.slide--section { background: var(--azul-900); color: var(--blanco); justify-content: center; }
+.slide--section .num { font-size: 6vw; font-weight: 800; color: var(--teal-400); opacity: .5; line-height: 1; }
+.slide--section h2 { color: var(--blanco); font-size: 3.05vw; margin-top: 1vh; }
+.slide--section p.lead { color: #cfe0ee; font-size: 1.9vw; }
+
+.slide--recap { background: var(--gris-100); }
+.slide--recap .slide-kicker { color: var(--ambar-400); }
+.slide--recap h2::before { content: "↺ "; color: var(--ambar-400); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5vw; flex: 1; align-items: start; }
+.two-col.wide-left { grid-template-columns: 1.3fr 1fr; }
+.two-col.wide-right { grid-template-columns: 1fr 1.3fr; }
+.col-box { background: var(--gris-100); border-radius: 14px; padding: 1.6vh 1.6vw; }
+.col-box h3 { margin-top: 0; }
+.col-box.acc-teal { border-left: 6px solid var(--teal-400); }
+.col-box.acc-ambar { border-left: 6px solid var(--ambar-400); }
+.col-box.acc-rojo { border-left: 6px solid var(--rojo-400); }
+.col-box.acc-azul { border-left: 6px solid var(--azul-600); }
+
+.slide--image .img-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.slide--image img { max-width: 100%; max-height: 54vh; border-radius: 10px; box-shadow: 0 6px 30px rgba(10,31,51,.25); border: 1px solid var(--gris-200); }
+.caption { text-align: center; font-size: 1.45vw; color: var(--gris-600); margin-top: 1.2vh; }
+
+pre.code-block {
+  background: var(--azul-950); color: #d8e6f2; border-radius: 12px;
+  padding: 1.6vh 1.6vw; font-family: var(--mono); font-size: 1.65vw;
+  line-height: 1.45; overflow: auto; margin: 0;
+}
+pre.code-block .c1 { color: var(--gris-400); font-style: italic; }
+pre.code-block .kw { color: var(--teal-300); }
+pre.code-block .st { color: var(--ambar-300); }
+pre.code-block .fn { color: #9cd3ff; }
+
+.formula-box {
+  background: var(--gris-100); border: 1px solid var(--gris-200); border-radius: 12px;
+  padding: 1.6vh 2vw; text-align: center; font-size: 2.2vw; color: var(--azul-950);
+  font-family: "Cambria Math", Georgia, serif; margin: 1vh 0;
+}
+.formula-box.big { font-size: 2.6vw; }
+
+.badge { display: inline-block; padding: .25em .8em; border-radius: 999px; font-size: 1.4vw; font-weight: 700; }
+.badge.teal { background: rgba(45,212,191,.15); color: #0f766e; }
+.badge.ambar { background: rgba(245,166,35,.16); color: #92600a; }
+.badge.rojo { background: rgba(242,85,90,.14); color: #a3181c; }
+
+.slide--check { background: var(--azul-900); color: var(--blanco); align-items: center; justify-content: center; text-align: center; }
+.slide--check .icon { font-size: 4vw; margin-bottom: 1vh; }
+.slide--check h2 { color: var(--blanco); font-size: 2.9vw; max-width: 84%; margin: 0 auto 1.4vh auto; }
+.slide--check p.lead { color: var(--teal-300); max-width: 80%; margin: 0 auto; font-size: 1.8vw; }
+.slide--check .hint { margin-top: 2.4vh; font-size: 1.45vw; color: var(--gris-400); max-width: 80%; margin-left: auto; margin-right: auto; }
+
+.slide--quote { background: linear-gradient(135deg, var(--teal-400), #17a394); color: var(--azul-950); align-items: center; justify-content: center; text-align: center; }
+.slide--quote blockquote { font-size: 2.9vw; font-weight: 700; line-height: 1.28; max-width: 84%; margin: 0 auto; }
+.slide--quote .context { font-size: 1.65vw; font-weight: 500; max-width: 76%; margin: 1.6vh auto 0 auto; opacity: .92; }
+.slide--quote .attrib { margin-top: 2vh; font-size: 1.5vw; opacity: .8; }
+
+.slide--transition { background: linear-gradient(135deg, var(--ambar-400), #e08a1a); color: var(--azul-950); justify-content: center; }
+.slide--transition .icon { font-size: 3.4vw; }
+.slide--transition h2 { color: var(--azul-950); font-size: 3.05vw; }
+.slide--transition .practice-list { font-size: 1.75vw; }
+.slide--transition code { background: rgba(10,31,51,.12); padding: .1em .4em; border-radius: 6px; }
+
+table.cmp { width: 100%; border-collapse: collapse; font-size: 1.6vw; }
+table.cmp th { background: var(--azul-900); color: var(--blanco); padding: .6em .8em; text-align: left; }
+table.cmp td { padding: .55em .8em; border-bottom: 1px solid var(--gris-200); vertical-align: top; }
+table.cmp tr:nth-child(even) td { background: var(--gris-100); }
+
+.tag-row { display: flex; gap: .6vw; flex-wrap: wrap; margin-top: 1vh; }
+.tag { background: var(--gris-100); border: 1px solid var(--gris-200); border-radius: 8px; padding: .3em .7em; font-family: var(--mono); font-size: 1.4vw; }
+
+.acronym { border-bottom: 1px dotted var(--gris-400); cursor: help; }
+
+/* --- chrome de navegación --- */
+.chrome { position: fixed; left: 0; right: 0; bottom: 0; height: 5.4vh; display: flex; align-items: center;
+  padding: 0 1.6vw; background: rgba(10,31,51,.92); backdrop-filter: blur(4px); z-index: 50; gap: 1vw; }
+.chrome .title { color: #9db4c8; font-size: 1.2vw; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chrome button { background: var(--azul-700); color: var(--blanco); border: none; border-radius: 8px;
+  padding: .5em 1em; font-size: 1.3vw; cursor: pointer; font-weight: 600; }
+.chrome button:hover { background: var(--teal-400); color: var(--azul-950); }
+.chrome .counter { color: var(--teal-300); font-family: var(--mono); font-size: 1.2vw; min-width: 4.5em; text-align: center; }
+.progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--teal-400); z-index: 60; transition: width .25s ease; }
+.slide { padding-bottom: 6.4vh; }
+
+@media print {
+  .chrome, .progress { display: none; }
+  .slide { position: relative; display: flex !important; page-break-after: always; height: 100vh; }
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress" style="width:0%"></div>
+<div class="deck">
+<section class="slide slide--title">
+  <div class="day-badge">Clase 3 de 10 · Módulo 2 · Día único</div>
+  <h1>Formatos de datos atmosféricos: NetCDF y GRIB</h1>
+  <p class="lead">Curso Intermedio de Python Aplicado para el WRF</p>
+  <div class="meta-row"><div class='meta-item'><b>Teoría</b>2 h</div><div class='meta-item'><b>Práctica</b>3 h</div><div class='meta-item'><b>Entorno</b>wrf2026</div></div>
+</section>
+<section class="slide slide--recap">
+  <div class='slide-kicker'>Repaso del Día 2 · 3 minutos, sin nota</div>
+  <h2>¿Lo recuerdas?</h2>
+  <div class="slide-body top"><ol class='bullets'>
+<li>¿Qué diferencia hay entre <code>.sel()</code> e <code>.isel()</code>?</li>
+<li>En una grilla <code>(tiempo, lat, lon)</code>, ¿qué deja <code>mean(axis=0)</code>?</li>
+<li>¿Para qué sirve <code>resample("1D")</code>?</li>
+</ol><p class="caption" style="margin-top:4vh">Claves: 1) por valor de la coordenada / por posición · 2) un mapa: se aplastó el tiempo · 3) pasar de datos horarios a diarios</p></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Antes de empezar</div>
+  <h2>Activar el entorno</h2>
+  
+  <div class="slide-body top"><pre class="code-block">conda activate wrf2026
+jupyter lab</pre></div>
+</section>
+<section class="slide slide--quote">
+  <blockquote>Hoy dejamos de usar datos sintéticos: por primera vez abrimos archivos NetCDF y GRIB reales.</blockquote>
+  
+  <div class="attrib">El Dataset genérico del Módulo 1 se vuelve concreto.</div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">1</div>
+    <h2>NetCDF: un formato autodescriptivo</h2>
+    <p class="lead">No es solo un contenedor de números</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Los tres componentes</div>
+  <h2>Dimensiones, variables y atributos</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li><strong>Dimensiones</strong>
+<ul class='bullets'>
+<li>Ejes con nombre y tamaño: <code>time: 744</code>, <code>latitude: 121</code></li>
+<li>No tienen valores por sí mismas, solo definen "cuántos"</li>
+</ul>
+</li>
+<li><strong>Variables</strong>
+<ul class='bullets'>
+<li>Arreglos de datos asociados a dimensiones</li>
+<li>Coordenadas (ej. <code>latitude</code>) vs. datos (ej. <code>t2m</code>)</li>
+</ul>
+</li>
+<li><strong>Atributos</strong>
+<ul class='bullets'>
+<li>Metadatos clave-valor: <code>units</code>, <code>long_name</code>, <code>standard_name</code></li>
+<li>Globales: institución, historia de procesamiento</li>
+</ul>
+</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Convención CF</div>
+  <h2>Climate and Forecast Metadata Conventions</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>Acuerdo de la comunidad sobre <strong>cómo nombrar y describir</strong> variables atmosféricas.</li>
+<li>Ej.: temperatura del aire a 2 m → <code>standard_name: air_temperature</code>, <code>units: K</code> — no un nombre libre como <code>"temp"</code>.</li>
+<li>Esto es lo que permite que herramientas genéricas (<code>xwrf</code>, Módulo 4) sepan qué hacer con una variable sin que el usuario se lo indique.</li>
+</ul></div>
+</section>
+<section class="slide slide--check">
+  <div class="icon">🔍</div>
+  <h2>¿En qué unidades creen que viene la temperatura en ERA5?</h2>
+  <p class="lead">K, °C o °F — decidan antes de abrir el archivo en la práctica.</p>
+  <div class='hint'>La convención CF de ERA5 usa Kelvin, no Celsius.</div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Lazy loading (carga perezosa)</div>
+  <h2>Apertura "perezosa" con Xarray</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li><code>xr.open_dataset(archivo)</code> lee solo metadatos (dimensiones, coordenadas, atributos), no todos los valores de inmediato.</li>
+<li>Los datos reales se leen del disco solo cuando se necesitan (graficar, reducir, exportar) — abrir el archivo es casi instantáneo, sin importar su tamaño.</li>
+<li>Importa porque archivos como <code>wrfout</code> o ERA5 de varios días pueden pesar cientos de MB a varios GB: si <code>open_dataset</code> cargara todo a memoria de inmediato, simplemente inspeccionar qué contiene un archivo sería lento.</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>En código</div>
+  <h2>Abrir un NetCDF e inspeccionarlo</h2>
+  
+  <div class="slide-body top"><pre class="code-block">ds = xr.open_dataset("era5_recortado.nc")
+
+ds.sizes          <span class="c1"># {'time': 168, 'latitude': 31, 'longitude': 17}</span>
+ds.data_vars      <span class="c1"># t2m, msl, ...</span>
+ds["t2m"].attrs   <span class="c1"># {'units': 'K', 'standard_name': 'air_temperature'}</span>
+ds.attrs["Conventions"]   <span class="c1"># 'CF-1.7'</span></pre></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Por qué importa para el WRF</div>
+  <h2>Este módulo es la bisagra del curso</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>El WRF consume datos de entrada casi siempre en <strong>GRIB2</strong> (de modelos operativos como GFS o ECMWF) o <strong>NetCDF</strong> (ERA5, tras conversión).</li>
+<li>Produce sus propias salidas (<code>wrfout</code>) en <strong>NetCDF</strong>.</li>
+<li>Descarga (Módulo 3), lectura de <code>wrfout</code> (Módulo 4) y validación (Módulo 5) asumen que ya sabemos abrir cualquiera de estos formatos.</li>
+</ul></div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">2</div>
+    <h2>GRIB/GRIB2: un formato orientado a mensajes</h2>
+    <p class="lead">La otra cara de la moneda frente a NetCDF</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Dos filosofías distintas</div>
+  <h2>NetCDF vs. GRIB</h2>
+  <div class="two-col"><div class="col-box acc-azul"><h3>NetCDF</h3><ul class='bullets'>
+<li>Un único archivo, estructura jerárquica coherente</li>
+<li>Nombres de variable en texto libre</li>
+<li>Más simple de inspeccionar</li>
+</ul></div><div class="col-box acc-ambar"><h3>GRIB/GRIB2 (GRIdded Binary)</h3><ul class='bullets'>
+<li>Secuencia de <strong>mensajes independientes</strong></li>
+<li>Cada mensaje: 1 variable, 1 nivel, 1 instante</li>
+<li>Codificado con tablas numéricas (más compacto)</li>
+<li>GRIB2 es la versión más reciente del formato, la que usan hoy GFS y ECMWF</li>
+</ul></div></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>El puente</div>
+  <h2>cfgrib traduce GRIB a Dataset de Xarray</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>En un GRIB las variables no vienen con nombre sino con un <strong>código numérico</strong>.</li>
+<li><code>cfgrib</code> traduce esos códigos a nombres (<code>t2m</code>, <code>u10</code>…) con unidades, usando unas tablas internacionales.</li>
+<li>Al final se obtiene el mismo <code>Dataset</code> de Xarray que con un NetCDF: no hace falta conocer los códigos.</li>
+<li>Lo que sí conviene: revisar <code>long_name</code> y <code>units</code> después de abrir, porque el nombre corto cambia entre fuentes (<code>2t</code> vs. <code>t2m</code>).</li>
+</ul>
+</li>
+<li>Homogeneiza la experiencia frente a NetCDF: mismo <code>Dataset</code> de Xarray al final, sin importar de qué formato vino.</li>
+<li>GRIB es preferido para difusión operativa (archivos pequeños, transmisión rápida) — por eso GFS (el modelo operativo de EE.UU.) llega en este formato.</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>En código</div>
+  <h2>Abrir un GRIB2 con cfgrib</h2>
+  
+  <div class="slide-body top"><pre class="code-block">ds_grib = xr.open_dataset("gfs.grib2", engine="cfgrib")
+
+ds_grib.data_vars   <span class="c1"># puede llamarse '2t' en vez de 't2m'</span></pre></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Cuidado</div>
+  <h2>Los nombres de variable NO son universales entre fuentes</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>La misma variable física (temperatura a 2 m) puede llamarse <code>t2m</code> en un archivo y <code>2t</code> en otro.</li>
+<li>No asumir que el nombre es el mismo — este problema se resuelve formalmente recién en el Módulo 3, al automatizar la descarga de varias fuentes.</li>
+</ul></div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">3</div>
+    <h2>Selección, recorte e interpolación</h2>
+    <p class="lead">Las operaciones espaciales que se usan en todo el resto del curso</p>
+  </div>
+</section>
+<section class="slide slide--check">
+  <div class="icon">⚠️</div>
+  <h2>El error más común de este módulo</h2>
+  <p class="lead">¿Qué pasa si hago .sel(latitude=slice(sur, norte)) sobre un dataset con latitud descendente?</p>
+  <div class='hint'>Spoiler: no da error. Da un resultado vacío. Por eso es peligroso.</div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>El gotcha real</div>
+  <h2>Orden de la latitud: ascendente vs. descendente</h2>
+  
+  <div class="slide-body top"><pre class="code-block"><span class="c1"># ERA5 real: latitud DESCENDENTE (90° -> -90°)</span>
+ds.latitude.values[:3]   <span class="c1"># array([90.0, 89.75, 89.5])</span>
+
+<span class="c1"># INCORRECTO si la coordenada es descendente:</span>
+ds.sel(latitude=slice(-20, 10))   <span class="c1"># ¡tamaño 0, sin error!</span>
+
+<span class="c1"># CORRECTO para descendente:</span>
+ds.sel(latitude=slice(10, -20))</pre></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Dos formas de "buscar un punto"</div>
+  <h2>.sel(nearest) vs. .interp(linear)</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li><code>.sel(method="nearest")</code> — valor <strong>exacto</strong> del punto de grilla más cercano, sin cálculo.</li>
+<li><code>.interp(method="linear")</code> — <strong>calcula</strong> un valor nuevo, ponderado por distancia a los nodos vecinos.</li>
+<li>En 2D esto es interpolación <strong>bilineal</strong>.</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Interpolación bilineal</div>
+  <h2>Ponderar por distancia a 4 nodos</h2>
+  <div class="formula-box big">f(x,y) ≈ w<sub>11</sub>f(Q<sub>11</sub>) + w<sub>21</sub>f(Q<sub>21</sub>) + w<sub>12</sub>f(Q<sub>12</sub>) + w<sub>22</sub>f(Q<sub>22</sub>)</div>
+  <p class='lead'>Sustento: Q₁₁, Q₁₂, Q₂₁, Q₂₂ son los 4 nodos de grilla que rodean al punto (x,y) que nos interesa — dos en la fila de abajo, dos en la de arriba, dos a la izquierda, dos a la derecha. f(Q₁₁) es el valor conocido (temperatura, por ejemplo) en ese nodo. Cada w (peso) es un número entre 0 y 1 que depende de qué tan cerca está (x,y) de ese nodo en particular; los cuatro pesos siempre suman 1.</p>
+  <div class="slide-body top"><ul class='bullets'>
+<li>No hace falta memorizar la fórmula exacta ni calcular los pesos a mano — Xarray lo hace internamente al llamar <code>.interp()</code>.</li>
+<li>La idea central: cuanto más cerca esté el punto de un nodo, mayor es su peso w, y más influye ese nodo en el resultado final.</li>
+<li>Ejemplo simple (una sola dimensión, para no complicar el cálculo): si a las 12:00 hace 20°C y a las 13:00 hace 22°C, el valor interpolado a las 12:30 (justo a la mitad) es 21°C — el promedio simple, porque está exactamente a mitad de camino entre ambos.
+<ul class='bullets'>
+<li>Si en cambio se quisiera el valor a las 12:15 (un cuarto del camino), el resultado pesa más hacia el valor de las 12:00: 20.5°C, no 21°C.</li>
+</ul>
+</li>
+<li>Se reutiliza en el Módulo 5 para interpolar el WRF a una estación observacional.</li>
+</ul></div>
+</section>
+<section class="slide slide--check">
+  <div class="icon">🗺️</div>
+  <h2>¿Nearest o interp — cuál usarían para precipitación convectiva?</h2>
+  <p class="lead">Piensen en qué tan "suave" es la variable en el espacio.</p>
+  <div class='hint'>La precipitación convectiva es muy heterogénea espacialmente — inventar un valor intermedio puede ser engañoso.</div>
+</section>
+<section class="slide slide--quote">
+  <blockquote>No se puede tratar wrfout como un dataset genérico sin decodificación adicional.</blockquote>
+  
+  <div class="attrib">Adelanto del Módulo 4 — hoy sembramos las herramientas que se usarán ahí.</div>
+</section>
+<section class="slide slide--transition">
+  <div class="icon">💻</div>
+  <h2>Pasamos a la práctica (3 h)</h2>
+  <p class="lead">Notebooks: 02, 03 y 04 del Módulo 2</p>
+  <div class="slide-body top"><ol class="practice-list"><li><strong>Inspección de un NetCDF</strong> tipo ERA5 (unidades, orden de latitud, convención CF), + refuerzo repitiendo la inspección sobre otra variable (<code>msl</code>, Pa vs. hPa).</li><li><strong>Apertura de un GRIB2</strong> con <code>cfgrib</code>, comparación de nombres de variable.</li><li><strong>Recorte de dominio y periodo</strong> — verificando el orden de latitud antes de recortar.</li><li><strong>Interpolación a un punto</strong> — nearest vs. linear, y (opcional) verificación manual de la fórmula bilineal.</li></ol></div>
+</section>
+<!-- bitacora -->
+<section class="slide">
+  <div class='slide-kicker'>Cierre del día 3 · 2 minutos</div>
+  <h2>Bitácora de la sesión</h2>
+  <div class="two-col wide-left"><div class="col-box acc-teal"><h3>Antes de irte</h3><ul class='bullets'>
+<li>Escanea el código o abre el enlace: el <strong>Día 3</strong> ya viene marcado.</li>
+<li>La primera vez completa «Tus datos»; luego solo el registro del día.</li>
+<li>Cuenta en una línea qué te costó y si se resolvió: con eso ajustamos la próxima clase.</li>
+</ul><p class="caption" style="word-break:break-all">https://claude.ai/artifact/FDdSaVQn2rjyJGG1HX1VfQ#d03</p></div><div class="col-box" style="display:flex;justify-content:center;align-items:center;background:#ffffff"><svg width="222" height="222" class="segno"><g transform="scale(6)"><path fill="#fff" d="M0 0h37v37h-37z"/><path class="qrline" stroke="#0b1f33" d="M2 2.5h7m2 0h1m1 0h2m1 0h1m2 0h2m3 0h1m3 0h7m-33 1h1m5 0h1m1 0h1m3 0h3m2 0h2m5 0h1m1 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h4m1 0h2m3 0h2m4 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m9 0h1m2 0h2m3 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m4 0h1m3 0h1m1 0h3m1 0h2m3 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m2 0h1m1 0h2m1 0h1m1 0h1m1 0h1m3 0h1m1 0h1m1 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-25 1h3m11 0h1m1 0h1m-25 1h1m5 0h1m1 0h1m1 0h2m2 0h2m1 0h1m2 0h1m2 0h4m2 0h3m-31 1h2m2 0h1m1 0h3m8 0h2m2 0h2m4 0h5m-33 1h3m1 0h1m1 0h1m3 0h3m2 0h1m2 0h1m2 0h1m4 0h1m1 0h1m1 0h2m-32 1h4m1 0h1m1 0h1m1 0h2m1 0h1m1 0h3m1 0h2m2 0h1m2 0h1m1 0h4m1 0h1m-33 1h3m1 0h3m2 0h1m2 0h8m1 0h1m1 0h2m1 0h1m5 0h1m-33 1h2m1 0h2m6 0h1m1 0h2m1 0h1m1 0h2m1 0h2m4 0h1m2 0h3m-32 1h1m1 0h1m1 0h3m1 0h1m3 0h1m3 0h1m4 0h1m2 0h7m-31 1h1m3 0h1m7 0h3m2 0h1m3 0h1m1 0h2m3 0h2m1 0h1m-31 1h2m2 0h2m1 0h2m1 0h1m4 0h1m2 0h1m1 0h1m2 0h1m1 0h2m3 0h1m-31 1h1m2 0h1m2 0h1m1 0h3m3 0h5m2 0h1m2 0h1m2 0h3m-32 1h1m2 0h2m1 0h2m1 0h2m3 0h2m3 0h1m3 0h1m1 0h1m1 0h1m1 0h2m1 0h1m-32 1h1m1 0h1m1 0h1m1 0h1m6 0h5m5 0h1m1 0h1m1 0h4m-32 1h1m2 0h1m2 0h1m1 0h5m3 0h1m5 0h1m2 0h1m1 0h3m-30 1h1m1 0h3m3 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2m2 0h3m1 0h4m-30 1h1m5 0h1m1 0h1m3 0h5m1 0h1m1 0h2m5 0h2m2 0h1m-32 1h1m2 0h1m3 0h4m8 0h1m2 0h2m1 0h2m3 0h2m-32 1h2m2 0h1m1 0h4m3 0h1m1 0h2m2 0h2m2 0h6m3 0h1m-25 1h5m1 0h2m2 0h3m3 0h1m3 0h1m1 0h1m1 0h1m-33 1h7m3 0h1m1 0h1m1 0h2m2 0h1m1 0h1m1 0h3m1 0h1m1 0h1m1 0h2m-32 1h1m5 0h1m5 0h1m6 0h1m2 0h3m3 0h4m-32 1h1m1 0h3m1 0h1m2 0h2m1 0h1m1 0h2m2 0h2m1 0h2m1 0h6m-30 1h1m1 0h3m1 0h1m4 0h1m2 0h1m1 0h1m2 0h1m1 0h2m1 0h2m1 0h2m1 0h3m-33 1h1m1 0h3m1 0h1m2 0h1m4 0h1m1 0h1m1 0h2m1 0h2m2 0h1m1 0h3m1 0h2m-33 1h1m5 0h1m3 0h2m1 0h4m5 0h1m1 0h2m1 0h4m-31 1h7m1 0h2m2 0h2m2 0h2m5 0h5m1 0h1m1 0h1"/></g></svg></div></div>
+</section>
+</div>
+<div class="chrome">
+  <button id="prev">&larr;</button>
+  <button id="next">&rarr;</button>
+  <div class="counter" id="counter">1 / 1</div>
+  <div class="title">Día 3 — Formatos de datos atmosféricos (Módulo 2)</div>
+</div>
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var idx = 0;
+  function show(i){
+    if (i < 0) i = 0;
+    if (i >= slides.length) i = slides.length - 1;
+    slides[idx].classList.remove('active');
+    idx = i;
+    slides[idx].classList.add('active');
+    document.getElementById('counter').textContent = (idx+1) + ' / ' + slides.length;
+    document.getElementById('progress').style.width = (100*(idx+1)/slides.length) + '%';
+    location.hash = 's' + (idx+1);
+  }
+  document.getElementById('next').onclick = function(){ show(idx+1); };
+  document.getElementById('prev').onclick = function(){ show(idx-1); };
+  window.addEventListener('keydown', function(e){
+    if (['ArrowRight','PageDown',' '].includes(e.key)) { show(idx+1); e.preventDefault(); }
+    else if (['ArrowLeft','PageUp'].includes(e.key)) { show(idx-1); e.preventDefault(); }
+    else if (e.key === 'Home') { show(0); }
+    else if (e.key === 'End') { show(slides.length-1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  document.querySelectorAll('.slide').forEach(function(s, i){
+    s.addEventListener('click', function(ev){
+      if (ev.target.closest('a') || ev.target.closest('.chrome')) return;
+      var rect = s.getBoundingClientRect();
+      var x = ev.clientX - rect.left;
+      if (x > rect.width/2) show(idx+1); else show(idx-1);
+    });
+  });
+  var startHash = location.hash;
+  if (startHash && /^#s\d+$/.test(startHash)) {
+    show(parseInt(startHash.slice(2),10)-1);
+  } else {
+    show(0);
+  }
+})();
+</script>
+</body>
+</html>

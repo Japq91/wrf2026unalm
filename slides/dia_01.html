@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Día 1 — Entorno y sintaxis esencial (Módulo 1)</title>
+<style>
+:root {
+  --azul-950: #0a1f33;
+  --azul-900: #0d2b4a;
+  --azul-800: #123a63;
+  --azul-700: #1a4d82;
+  --azul-600: #2563a3;
+  --teal-400: #2dd4bf;
+  --teal-300: #5eead4;
+  --ambar-400: #f5a623;
+  --ambar-300: #f8c471;
+  --rojo-400: #f2555a;
+  --verde-400: #4ade80;
+  --gris-100: #f4f6f8;
+  --gris-200: #e6eaee;
+  --gris-400: #9aa7b4;
+  --gris-600: #5b6b7a;
+  --texto: #10202f;
+  --blanco: #ffffff;
+  --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  font-family: var(--fuente);
+  background: var(--azul-950);
+  color: var(--texto);
+  overflow: hidden;
+}
+.deck { position: relative; width: 100vw; height: 100vh; }
+.slide {
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--blanco);
+  padding: 4.2vh 6vw 3vh 6vw;
+}
+.slide.active { display: flex; }
+.slide-kicker {
+  font-size: 1.65vw; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--azul-600); font-weight: 700; margin-bottom: .6vh;
+}
+.slide h1 { font-size: 3.6vw; line-height: 1.12; margin: 0 0 1.2vh 0; color: var(--azul-950); }
+.slide h2 { font-size: 2.7vw; line-height: 1.2; margin: 0 0 1.6vh 0; color: var(--azul-950); }
+.slide h3 { font-size: 1.95vw; margin: 0 0 1vh 0; color: var(--azul-700); }
+.slide p.lead { font-size: 1.9vw; color: var(--gris-600); margin: 0 0 1.4vh 0; }
+.bullets { font-size: 1.9vw; line-height: 1.42; color: var(--texto); margin: 0; padding-left: 1.2em; }
+.bullets li { margin-bottom: .45em; }
+.bullets ul { margin-top: .3em; font-size: .86em; color: var(--gris-600); }
+.slide-body { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; justify-content: center; }
+.slide-body.top { justify-content: flex-start; }
+
+/* --- tipos de slide --- */
+.slide--title { background: linear-gradient(135deg, var(--azul-950), var(--azul-800) 60%, var(--azul-700)); color: var(--blanco); justify-content: center; align-items: flex-start; }
+.slide--title .day-badge { font-size: 1.75vw; color: var(--teal-300); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1.4vh; }
+.slide--title h1 { color: var(--blanco); font-size: 4.1vw; max-width: 90%; }
+.slide--title p.lead { color: #cfe0ee; font-size: 2vw; max-width: 70%; }
+.slide--title .meta-row { display: flex; gap: 2.2vw; margin-top: 3vh; }
+.slide--title .meta-item { font-size: 1.4vw; color: var(--teal-300); border-left: 3px solid var(--teal-400); padding-left: .8em; }
+.slide--title .meta-item b { display: block; color: var(--blanco); font-size: 1.7vw; }
+
+.slide--section { background: var(--azul-900); color: var(--blanco); justify-content: center; }
+.slide--section .num { font-size: 6vw; font-weight: 800; color: var(--teal-400); opacity: .5; line-height: 1; }
+.slide--section h2 { color: var(--blanco); font-size: 3.05vw; margin-top: 1vh; }
+.slide--section p.lead { color: #cfe0ee; font-size: 1.9vw; }
+
+.slide--recap { background: var(--gris-100); }
+.slide--recap .slide-kicker { color: var(--ambar-400); }
+.slide--recap h2::before { content: "↺ "; color: var(--ambar-400); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5vw; flex: 1; align-items: start; }
+.two-col.wide-left { grid-template-columns: 1.3fr 1fr; }
+.two-col.wide-right { grid-template-columns: 1fr 1.3fr; }
+.col-box { background: var(--gris-100); border-radius: 14px; padding: 1.6vh 1.6vw; }
+.col-box h3 { margin-top: 0; }
+.col-box.acc-teal { border-left: 6px solid var(--teal-400); }
+.col-box.acc-ambar { border-left: 6px solid var(--ambar-400); }
+.col-box.acc-rojo { border-left: 6px solid var(--rojo-400); }
+.col-box.acc-azul { border-left: 6px solid var(--azul-600); }
+
+.slide--image .img-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.slide--image img { max-width: 100%; max-height: 54vh; border-radius: 10px; box-shadow: 0 6px 30px rgba(10,31,51,.25); border: 1px solid var(--gris-200); }
+.caption { text-align: center; font-size: 1.45vw; color: var(--gris-600); margin-top: 1.2vh; }
+
+pre.code-block {
+  background: var(--azul-950); color: #d8e6f2; border-radius: 12px;
+  padding: 1.6vh 1.6vw; font-family: var(--mono); font-size: 1.65vw;
+  line-height: 1.45; overflow: auto; margin: 0;
+}
+pre.code-block .c1 { color: var(--gris-400); font-style: italic; }
+pre.code-block .kw { color: var(--teal-300); }
+pre.code-block .st { color: var(--ambar-300); }
+pre.code-block .fn { color: #9cd3ff; }
+
+.formula-box {
+  background: var(--gris-100); border: 1px solid var(--gris-200); border-radius: 12px;
+  padding: 1.6vh 2vw; text-align: center; font-size: 2.2vw; color: var(--azul-950);
+  font-family: "Cambria Math", Georgia, serif; margin: 1vh 0;
+}
+.formula-box.big { font-size: 2.6vw; }
+
+.badge { display: inline-block; padding: .25em .8em; border-radius: 999px; font-size: 1.4vw; font-weight: 700; }
+.badge.teal { background: rgba(45,212,191,.15); color: #0f766e; }
+.badge.ambar { background: rgba(245,166,35,.16); color: #92600a; }
+.badge.rojo { background: rgba(242,85,90,.14); color: #a3181c; }
+
+.slide--check { background: var(--azul-900); color: var(--blanco); align-items: center; justify-content: center; text-align: center; }
+.slide--check .icon { font-size: 4vw; margin-bottom: 1vh; }
+.slide--check h2 { color: var(--blanco); font-size: 2.9vw; max-width: 84%; margin: 0 auto 1.4vh auto; }
+.slide--check p.lead { color: var(--teal-300); max-width: 80%; margin: 0 auto; font-size: 1.8vw; }
+.slide--check .hint { margin-top: 2.4vh; font-size: 1.45vw; color: var(--gris-400); max-width: 80%; margin-left: auto; margin-right: auto; }
+
+.slide--quote { background: linear-gradient(135deg, var(--teal-400), #17a394); color: var(--azul-950); align-items: center; justify-content: center; text-align: center; }
+.slide--quote blockquote { font-size: 2.9vw; font-weight: 700; line-height: 1.28; max-width: 84%; margin: 0 auto; }
+.slide--quote .context { font-size: 1.65vw; font-weight: 500; max-width: 76%; margin: 1.6vh auto 0 auto; opacity: .92; }
+.slide--quote .attrib { margin-top: 2vh; font-size: 1.5vw; opacity: .8; }
+
+.slide--transition { background: linear-gradient(135deg, var(--ambar-400), #e08a1a); color: var(--azul-950); justify-content: center; }
+.slide--transition .icon { font-size: 3.4vw; }
+.slide--transition h2 { color: var(--azul-950); font-size: 3.05vw; }
+.slide--transition .practice-list { font-size: 1.75vw; }
+.slide--transition code { background: rgba(10,31,51,.12); padding: .1em .4em; border-radius: 6px; }
+
+table.cmp { width: 100%; border-collapse: collapse; font-size: 1.6vw; }
+table.cmp th { background: var(--azul-900); color: var(--blanco); padding: .6em .8em; text-align: left; }
+table.cmp td { padding: .55em .8em; border-bottom: 1px solid var(--gris-200); vertical-align: top; }
+table.cmp tr:nth-child(even) td { background: var(--gris-100); }
+
+.tag-row { display: flex; gap: .6vw; flex-wrap: wrap; margin-top: 1vh; }
+.tag { background: var(--gris-100); border: 1px solid var(--gris-200); border-radius: 8px; padding: .3em .7em; font-family: var(--mono); font-size: 1.4vw; }
+
+.acronym { border-bottom: 1px dotted var(--gris-400); cursor: help; }
+
+/* --- chrome de navegación --- */
+.chrome { position: fixed; left: 0; right: 0; bottom: 0; height: 5.4vh; display: flex; align-items: center;
+  padding: 0 1.6vw; background: rgba(10,31,51,.92); backdrop-filter: blur(4px); z-index: 50; gap: 1vw; }
+.chrome .title { color: #9db4c8; font-size: 1.2vw; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chrome button { background: var(--azul-700); color: var(--blanco); border: none; border-radius: 8px;
+  padding: .5em 1em; font-size: 1.3vw; cursor: pointer; font-weight: 600; }
+.chrome button:hover { background: var(--teal-400); color: var(--azul-950); }
+.chrome .counter { color: var(--teal-300); font-family: var(--mono); font-size: 1.2vw; min-width: 4.5em; text-align: center; }
+.progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--teal-400); z-index: 60; transition: width .25s ease; }
+.slide { padding-bottom: 6.4vh; }
+
+@media print {
+  .chrome, .progress { display: none; }
+  .slide { position: relative; display: flex !important; page-break-after: always; height: 100vh; }
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress" style="width:0%"></div>
+<div class="deck">
+<section class="slide slide--title">
+  <div class="day-badge">Clase 1 de 10 · Módulo 1 · Día 1 de 2</div>
+  <h1>Entorno de trabajo y sintaxis esencial de Python</h1>
+  <p class="lead">Curso Intermedio de Python Aplicado para el WRF</p>
+  <div class="meta-row"><div class='meta-item'><b>Teoría</b>2 h</div><div class='meta-item'><b>Práctica</b>3 h</div><div class='meta-item'><b>Entorno</b>wrf2026</div></div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">👋</div>
+    <h2>Bienvenida al curso</h2>
+    <p class="lead">10 días · 50 horas · un pipeline propio en Python para trabajar con el WRF</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Una sigla que vamos a usar todo el curso</div>
+  <h2>¿Qué es el WRF?</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li><strong>WRF</strong> = <em>Weather Research and Forecasting model</em> — un modelo numérico de predicción atmosférica de mesoescala, escrito en Fortran, usado en investigación y en pronóstico operativo en todo el mundo.</li>
+<li>El WRF necesita <strong>datos de entrada</strong> (condiciones iniciales y de frontera) y produce <strong>datos de salida</strong> (la simulación en sí).</li>
+<li>Este curso no enseña a correr el WRF — enseña a automatizar, con Python, todo lo que rodea esa ejecución: conseguir sus insumos, leer sus resultados, y comprobar que esos resultados sean creíbles.</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Hacia dónde vamos</div>
+  <h2>El curso en 6 módulos</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li><strong>Módulo 1</strong> (hoy y mañana) — Python básico: la caja de herramientas.</li>
+<li><strong>Módulo 2</strong> — Formatos de datos atmosféricos: NetCDF y GRIB.</li>
+<li><strong>Módulo 3</strong> — Descarga automatizada de datos de entrada (ERA5, GFS).</li>
+<li><strong>Módulo 4</strong> — Lectura y visualización de salidas del WRF (<code>wrfout</code>, el nombre típico de los archivos que produce el modelo).</li>
+<li><strong>Módulo 5</strong> — Validación de resultados contra observaciones.</li>
+<li><strong>Módulo 6</strong> — Todo integrado en un pipeline reproducible (proyecto final).</li>
+</ul></div>
+</section>
+<section class="slide slide--quote">
+  <blockquote>Todo lo que hacemos después —descargar ERA5, leer wrfout, calcular un RMSE— es, en el fondo, manipular arreglos numéricos con metadatos.</blockquote>
+  <p class='context'>"Metadatos" aquí quiere decir: junto a cada número, información sobre qué representa (una fecha, una coordenada, una unidad). Sin eso, un arreglo de números es solo eso — números sin significado.</p>
+  <div class="attrib">Por eso empezamos por los fundamentos de Python, no por WRF.</div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">1</div>
+    <h2>Entornos virtuales</h2>
+    <p class="lead">¿Qué son y por qué instalamos desde un archivo versionado?</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Concepto</div>
+  <h2>Python es un lenguaje interpretado</h2>
+  <p class='lead'>A diferencia de Fortran (el lenguaje del WRF), que se compila antes de ejecutar.</p>
+  <div class="slide-body top"><ul class='bullets'>
+<li>Cada línea se traduce y ejecuta <strong>en el momento</strong>, no de una sola vez al inicio.</li>
+<li>Ventaja: iterar rápido, probar ideas en segundos.</li>
+<li>Consecuencia práctica: dos proyectos pueden necesitar <strong>versiones distintas</strong> de la misma librería (<code>xarray 2023.1</code> vs. <code>xarray 2024.6</code>), y no siempre son compatibles entre sí.</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>El problema, con un ejemplo concreto</div>
+  <h2>Sin entornos separados...</h2>
+  <div class="two-col"><div class="col-box acc-rojo"><h3>Proyecto A (enero)</h3><ul class='bullets'>
+<li>Necesita <code>xarray 2023.1</code></li>
+<li>Se instala directamente en el sistema ("global"), sin aislar nada</li>
+<li>Funciona bien... por ahora</li>
+</ul></div><div class="col-box acc-rojo"><h3>Proyecto B (marzo)</h3><ul class='bullets'>
+<li>Necesita <code>xarray 2024.6</code>, que cambió cómo lee ciertos archivos</li>
+<li><code>pip install --upgrade xarray</code> reemplaza la versión anterior</li>
+<li><strong>Proyecto A deja de funcionar</strong>, sin haber tocado su código</li>
+</ul></div></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>La solución</div>
+  <h2>Un entorno virtual por proyecto</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>Miniconda crea una carpeta <strong>aislada</strong> con su propia copia de Python y de cada librería.</li>
+<li>El entorno del curso se llama <strong><code>wrf2026</code></strong>.</li>
+<li><code>base</code> (el entorno por defecto) se deja intacto — WRF y su cadena de Python conviene mantenerlos separados de este entorno.</li>
+</ul></div>
+</section>
+<section class="slide slide--check">
+  <div class="icon">🤔</div>
+  <h2>¿Por qué no instalar todo en <code>base</code> y ya?</h2>
+  <p class="lead">Piensen 30 segundos antes de la siguiente diapositiva.</p>
+  <div class='hint'>Pista: piensen qué pasa el día que otro curso o proyecto necesite una versión distinta de la misma librería.</div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Práctica de hoy</div>
+  <h2>Instalación desde el repositorio del curso</h2>
+  
+  <div class="slide-body top"><pre class="code-block"><span class="c1"># 1. Clonar el repositorio del curso</span>
+git clone https://github.com/Japq91/wrf2026unalm.git
+cd wrf2026unalm
+
+<span class="c1"># 2. Crear el entorno a partir de environment.yml</span>
+conda env create -f environment.yml
+
+<span class="c1"># 3. Activar (¡en cada terminal nueva!)</span>
+conda activate wrf2026
+
+<span class="c1"># Al empezar cada clase: traer el material nuevo</span>
+git pull</pre></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Verificación</div>
+  <h2>¿Quedó bien instalado?</h2>
+  
+  <div class="slide-body top"><pre class="code-block"><span class="c1"># wrf2026 debe aparecer marcado como activo</span>
+conda env list
+
+<span class="c1"># no debe arrojar ningún error de import</span>
+python -c "import numpy, pandas, xarray, matplotlib; print('OK')"
+
+<span class="c1"># debe abrir usando el intérprete de wrf2026, no el de base</span>
+jupyter lab</pre></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Importante</div>
+  <h2>La activación no es permanente</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li><code>conda activate wrf2026</code> solo dura mientras esa <strong>terminal</strong> siga abierta.</li>
+<li>Cada vez que se abre una terminal nueva (mañana, la próxima semana), hay que activarlo de nuevo <strong>antes</strong> de abrir Jupyter.</li>
+<li>Señal rápida de que está bien: <code>(wrf2026)</code> al inicio de la línea de comandos.</li>
+</ul></div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">2</div>
+    <h2>Tipos de datos y variables</h2>
+    <p class="lead">El modelo mental que evita errores silenciosos más adelante</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Tipos primitivos</div>
+  <h2>int, float, str, bool</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li><code>int</code> — números enteros: <code>24</code>, <code>-3</code></li>
+<li><code>float</code> — números con decimales: <code>18.5</code>, <code>1013.25</code></li>
+<li><code>str</code> — texto: <code>"2026-01-15"</code></li>
+<li><code>bool</code> — verdadero/falso: <code>True</code>, <code>False</code></li>
+</ul></div>
+</section>
+<section class="slide slide--check">
+  <div class="icon">🧮</div>
+  <h2>¿Cuánto da 0.1 + 0.2 en Python?</h2>
+  <p class="lead">¿Exactamente 0.3? Pruébenlo mentalmente antes de ver la respuesta.</p>
+  <div class='hint'>→</div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Respuesta</div>
+  <h2>Punto flotante: precisión limitada</h2>
+  
+  <div class="slide-body top"><pre class="code-block">&gt;&gt;&gt; 0.1 + 0.2
+<span class="st">0.30000000000000004</span>
+
+&gt;&gt;&gt; 0.1 + 0.2 == 0.3
+<span class="kw">False</span></pre></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>¿Por qué importa?</div>
+  <h2>Nunca comparar decimales con ==</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>La computadora guarda los decimales en binario, y muchos (como 0.1) no se pueden guardar exactos, igual que 1/3 no se puede escribir exacto en decimales (0.333...).</li>
+<li>No es un defecto de Python: pasa en casi todos los lenguajes.</li>
+<li>La forma correcta: comparar con una <strong>tolerancia</strong>: <code>np.isclose(0.1 + 0.2, 0.3)</code> da <code>True</code>.</li>
+<li>Lo vamos a necesitar en el Módulo 5, al comparar el WRF con observaciones.</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Modelo mental</div>
+  <h2>Una variable es una etiqueta, no una caja</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>En Python, una variable <strong>apunta</strong> a un objeto en memoria; no lo "contiene", como sí ocurriría en una caja física donde guardar algo distinto reemplaza lo anterior.</li>
+<li>Si el objeto es <strong>mutable</strong> (como una lista o un diccionario), modificarlo desde una función afecta al original — no a una copia.</li>
+<li>Si el objeto es <strong>inmutable</strong> (un número, un texto, una tupla), no hay este riesgo: cualquier "cambio" en realidad crea un objeto nuevo, y el original queda intacto.</li>
+<li>Esto explica un tipo de error muy común entre quienes recién empiezan: modificar sin querer un dato que se pensaba estaba "a salvo" fuera de la función.</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Ejemplo</div>
+  <h2>Mutabilidad en acción</h2>
+  
+  <div class="slide-body top"><pre class="code-block"><span class="kw">def</span> <span class="fn">agregar_medicion</span>(lista, valor):
+    lista.append(valor)  <span class="c1"># modifica la lista original</span>
+    <span class="kw">return</span> lista
+
+temperaturas = [18.2, 19.0, 20.1]
+resultado = agregar_medicion(temperaturas, 21.5)
+
+<span class="c1"># temperaturas YA CAMBIÓ, aunque no se reasignó explícitamente</span>
+print(temperaturas)  <span class="c1"># [18.2, 19.0, 20.1, 21.5]</span></pre></div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">3</div>
+    <h2>Estructuras de datos</h2>
+    <p class="lead">Listas y diccionarios: cuándo usar cada una</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Acceso a datos</div>
+  <h2>Lista (posición) vs. diccionario (clave)</h2>
+  <div class="two-col"><div class="col-box acc-azul"><h3>Lista — por posición</h3><ul class='bullets'>
+<li><code>temperaturas[2]</code></li>
+<li>Frágil: hay que recordar el orden</li>
+<li>Útil cuando el orden mismo importa</li>
+</ul></div><div class="col-box acc-teal"><h3>Diccionario — por clave</h3><ul class='bullets'>
+<li><code>temperaturas["2026-01-03"]</code></li>
+<li>Autoexplicativo</li>
+<li>Acceso en tiempo prácticamente constante (tabla hash)</li>
+</ul></div></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Anidamiento</div>
+  <h2>Listas de diccionarios</h2>
+  
+  <div class="slide-body top"><pre class="code-block">estaciones = {
+    "Von Humboldt": {"lat": -12.082, "lon": -76.939, "temp": [21.7, 21.5]},
+    "Ceres":        {"lat": -12.029, "lon": -76.927, "temp": [23.0, 22.8]},
+}
+
+estaciones["Ceres"]["lat"]   <span class="c1"># -12.029</span></pre></div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">4</div>
+    <h2>Flujos de control</h2>
+    <p class="lead">Condicionales y bucles: reglas y repetición</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Condicionales</div>
+  <h2>if / elif / else como reglas físicas</h2>
+  
+  <div class="slide-body top"><pre class="code-block"><span class="kw">def</span> <span class="fn">clasificar_precipitacion</span>(valor_mm):
+    <span class="kw">if</span> valor_mm &lt;= 0.1:
+        <span class="kw">return</span> <span class="st">"sin lluvia"</span>
+    <span class="kw">elif</span> valor_mm &lt;= 2.0:
+        <span class="kw">return</span> <span class="st">"llovizna"</span>
+    <span class="kw">elif</span> valor_mm &lt;= 15.0:
+        <span class="kw">return</span> <span class="st">"moderada"</span>
+    <span class="kw">else</span>:
+        <span class="kw">return</span> <span class="st">"fuerte"</span></pre></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Bucles</div>
+  <h2>for / while — iterar sin controlar índices</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li><code>for temp in temperaturas:</code> en vez de <code>for i in range(len(temperaturas)):</code> cuando no se necesita la posición — más corto y más difícil de escribir mal.</li>
+<li>Evita errores de <strong>"off-by-one"</strong>
+<ul class='bullets'>
+<li>Es el clásico error de contar mal el inicio o el final de un rango — por ejemplo, olvidar que en Python el conteo empieza en 0, no en 1, y terminar leyendo un dato de más o de menos.</li>
+<li>Al escribir <code>for temp in temperaturas:</code> ese error deja de ser posible, porque nunca se maneja el índice a mano.</li>
+</ul>
+</li>
+<li><code>while</code> cuando no se sabe de antemano cuántas iteraciones harán falta — por ejemplo, repetir un intento de descarga hasta que tenga éxito (idea que se retoma en el Módulo 3).</li>
+</ul></div>
+</section>
+<section class="slide slide--section">
+  <div class="slide-body">
+    <div class="num">5</div>
+    <h2>Funciones y organización</h2>
+    <p class="lead">El bloque de construcción de todo el resto del curso</p>
+  </div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>Abstracción</div>
+  <h2>Una función = nombre + entradas + salida</h2>
+  
+  <div class="slide-body top"><ul class='bullets'>
+<li>Permite reutilizar lógica sin copiar y pegar código: se escribe una vez, se usa muchas veces con distintos datos.</li>
+<li>Desde el Módulo 3 en adelante, cada tarea del pipeline (descargar, graficar, validar) se encapsula en funciones.</li>
+<li><strong>Scope (alcance):</strong> una variable definida dentro de una función no existe fuera de ella.
+<ul class='bullets'>
+<li>Ejemplo: si dentro de <code>calcular_promedio()</code> se crea una variable <code>suma</code>, esa <code>suma</code> desaparece apenas la función termina — no se puede usar después, afuera.</li>
+<li>Esto evita efectos secundarios inesperados: dos funciones distintas pueden usar el mismo nombre de variable internamente sin pisarse una a la otra.</li>
+</ul>
+</li>
+</ul></div>
+</section>
+<section class="slide">
+  <div class='slide-kicker'>¿Notebook o script?</div>
+  <h2>Cuándo usar cada uno</h2>
+  <div class="slide-body top">
+    <table class="cmp"><thead><tr><th></th><th>Notebook (.ipynb)</th><th>Script (.py)</th></tr></thead><tbody><tr><td>Uso ideal</td><td>Explorar, ver resultados paso a paso</td><td>Lógica reutilizable, correr sin supervisión</td></tr><tr><td>Este curso</td><td>Práctica y exploración de cada módulo</td><td>A partir del Módulo 3, lo que se automatiza</td></tr><tr><td>Ejemplo hoy</td><td><code>02_practica_dia1.ipynb</code></td><td><code>clasificar_precipitacion.py</code></td></tr></tbody></table>
+  </div>
+</section>
+<section class="slide slide--check">
+  <div class="icon">✅</div>
+  <h2>Antes de pasar a la práctica</h2>
+  <p class="lead">¿Podrían explicar, con sus propias palabras, por qué mutar una lista dentro de una función afecta a la lista original fuera de ella?</p>
+  <div class='hint'>Si no están seguros, es la primera pregunta a resolver en la práctica de hoy.</div>
+</section>
+<section class="slide slide--transition">
+  <div class="icon">💻</div>
+  <h2>Pasamos a la práctica (3 h)</h2>
+  <p class="lead">Notebook: 02_practica_dia1.ipynb — 4 ejercicios</p>
+  <div class="slide-body top"><ol class="practice-list"><li><strong>Estadísticas manuales</strong> sobre las temperaturas reales de un día en La Molina (sin NumPy todavía).</li><li><strong>Diccionarios anidados</strong> — 5 estaciones de SENAMHI en Lima, y dónde faltan datos.</li><li><strong>Script independiente</strong> — <code>clasificar_precipitacion.py</code>, ejecutado desde la terminal.</li><li>Cierre y dudas.</li></ol></div>
+</section>
+<!-- bitacora -->
+<section class="slide">
+  <div class='slide-kicker'>Cierre del día 1 · 2 minutos</div>
+  <h2>Bitácora de la sesión</h2>
+  <div class="two-col wide-left"><div class="col-box acc-teal"><h3>Antes de irte</h3><ul class='bullets'>
+<li>Escanea el código o abre el enlace: el <strong>Día 1</strong> ya viene marcado.</li>
+<li>La primera vez completa «Tus datos»; luego solo el registro del día.</li>
+<li>Cuenta en una línea qué te costó y si se resolvió: con eso ajustamos la próxima clase.</li>
+</ul><p class="caption" style="word-break:break-all">https://claude.ai/artifact/FDdSaVQn2rjyJGG1HX1VfQ#d01</p></div><div class="col-box" style="display:flex;justify-content:center;align-items:center;background:#ffffff"><svg width="222" height="222" class="segno"><g transform="scale(6)"><path fill="#fff" d="M0 0h37v37h-37z"/><path class="qrline" stroke="#0b1f33" d="M2 2.5h7m2 0h1m2 0h4m2 0h2m1 0h3m2 0h7m-33 1h1m5 0h1m3 0h2m1 0h5m3 0h3m2 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m2 0h1m2 0h2m3 0h1m2 0h1m1 0h2m2 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m2 0h3m1 0h5m1 0h2m2 0h2m1 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m2 0h2m2 0h2m2 0h2m1 0h1m1 0h1m3 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m1 0h1m2 0h3m1 0h2m2 0h4m3 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-18 1h4m2 0h1m1 0h1m-24 1h1m2 0h1m1 0h2m1 0h2m1 0h1m2 0h1m1 0h1m3 0h3m1 0h2m1 0h1m-28 1h1m2 0h2m5 0h8m2 0h2m2 0h4m-28 1h1m2 0h1m1 0h10m3 0h3m4 0h1m1 0h2m1 0h1m1 0h1m-33 1h1m7 0h1m1 0h1m2 0h1m2 0h1m3 0h3m1 0h1m1 0h1m1 0h2m1 0h1m-31 1h4m1 0h4m1 0h2m1 0h1m1 0h1m1 0h1m5 0h4m1 0h1m1 0h2m-32 1h1m1 0h1m4 0h2m1 0h1m1 0h3m1 0h1m1 0h1m3 0h2m3 0h2m1 0h2m-32 1h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2m1 0h2m4 0h1m1 0h1m1 0h2m3 0h2m-32 1h1m2 0h2m4 0h4m3 0h2m1 0h3m1 0h1m2 0h3m2 0h1m-31 1h2m3 0h1m1 0h1m1 0h1m1 0h4m1 0h1m1 0h1m1 0h2m3 0h1m1 0h1m2 0h1m-31 1h1m1 0h1m1 0h1m1 0h1m2 0h2m2 0h4m3 0h1m1 0h3m1 0h1m1 0h1m2 0h1m-33 1h1m4 0h2m3 0h2m1 0h2m2 0h1m3 0h1m8 0h3m-32 1h1m2 0h2m1 0h1m1 0h6m6 0h3m2 0h2m3 0h1m-32 1h2m4 0h1m1 0h2m2 0h1m1 0h2m1 0h1m3 0h1m1 0h1m1 0h1m-19 1h1m1 0h1m3 0h3m1 0h1m2 0h2m3 0h1m4 0h3m-33 1h2m4 0h1m1 0h2m1 0h2m3 0h1m1 0h2m5 0h2m1 0h1m3 0h1m-32 1h2m4 0h2m1 0h1m2 0h3m2 0h1m1 0h5m2 0h1m4 0h1m-33 1h1m1 0h5m1 0h1m7 0h2m2 0h2m2 0h6m1 0h2m-25 1h1m4 0h2m1 0h2m1 0h6m3 0h2m2 0h1m-33 1h7m3 0h3m1 0h1m1 0h3m1 0h2m2 0h1m1 0h1m1 0h4m-32 1h1m5 0h1m1 0h2m1 0h1m3 0h4m1 0h2m2 0h1m3 0h1m3 0h1m-33 1h1m1 0h3m1 0h1m3 0h1m2 0h1m4 0h1m1 0h1m1 0h1m1 0h6m1 0h2m-33 1h1m1 0h3m1 0h1m1 0h3m2 0h1m1 0h2m1 0h1m1 0h1m1 0h1m3 0h1m1 0h1m-29 1h1m1 0h3m1 0h1m4 0h8m3 0h2m4 0h1m3 0h1m-33 1h1m5 0h1m2 0h1m1 0h1m1 0h2m2 0h2m2 0h1m1 0h1m1 0h1m-26 1h7m1 0h1m1 0h1m1 0h2m1 0h1m5 0h2m1 0h3m1 0h1m2 0h1"/></g></svg></div></div>
+</section>
+</div>
+<div class="chrome">
+  <button id="prev">&larr;</button>
+  <button id="next">&rarr;</button>
+  <div class="counter" id="counter">1 / 1</div>
+  <div class="title">Día 1 — Entorno y sintaxis esencial (Módulo 1)</div>
+</div>
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var idx = 0;
+  function show(i){
+    if (i < 0) i = 0;
+    if (i >= slides.length) i = slides.length - 1;
+    slides[idx].classList.remove('active');
+    idx = i;
+    slides[idx].classList.add('active');
+    document.getElementById('counter').textContent = (idx+1) + ' / ' + slides.length;
+    document.getElementById('progress').style.width = (100*(idx+1)/slides.length) + '%';
+    location.hash = 's' + (idx+1);
+  }
+  document.getElementById('next').onclick = function(){ show(idx+1); };
+  document.getElementById('prev').onclick = function(){ show(idx-1); };
+  window.addEventListener('keydown', function(e){
+    if (['ArrowRight','PageDown',' '].includes(e.key)) { show(idx+1); e.preventDefault(); }
+    else if (['ArrowLeft','PageUp'].includes(e.key)) { show(idx-1); e.preventDefault(); }
+    else if (e.key === 'Home') { show(0); }
+    else if (e.key === 'End') { show(slides.length-1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  document.querySelectorAll('.slide').forEach(function(s, i){
+    s.addEventListener('click', function(ev){
+      if (ev.target.closest('a') || ev.target.closest('.chrome')) return;
+      var rect = s.getBoundingClientRect();
+      var x = ev.clientX - rect.left;
+      if (x > rect.width/2) show(idx+1); else show(idx-1);
+    });
+  });
+  var startHash = location.hash;
+  if (startHash && /^#s\d+$/.test(startHash)) {
+    show(parseInt(startHash.slice(2),10)-1);
+  } else {
+    show(0);
+  }
+})();
+</script>
+</body>
+</html>

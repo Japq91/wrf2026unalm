@@ -1,0 +1,26 @@
+name: wrf2026
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - xarray
+  - matplotlib
+  - cartopy
+  - cfgrib
+  - eccodes
+  - netcdf4
+  - scipy
+  - pyproj
+  - geopandas
+  - herbie-data
+  - tcsh
+  - jupyterlab
+  - ipykernel
+  - pillow
+  - pip
+  - pip:
+      - cdsapi
+      - xwrf
+      - SkillMetrics

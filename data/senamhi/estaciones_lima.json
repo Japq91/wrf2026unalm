@@ -1,0 +1,52 @@
+[
+  {
+    "codigo": "112265",
+    "nombre": "San Martin De Porres",
+    "distrito": "SAN MARTIN DE PORRES",
+    "lat": -12.00889,
+    "lon": -77.08447,
+    "alt_m": 56,
+    "tipo": "automatica (EMA)",
+    "archivo": "112265_2025_03.csv"
+  },
+  {
+    "codigo": "112181",
+    "nombre": "Campo De Marte",
+    "distrito": "JESUS MARIA",
+    "lat": -12.07056,
+    "lon": -77.04314,
+    "alt_m": 117,
+    "tipo": "automatica (EMA)",
+    "archivo": "112181_2025_03.csv"
+  },
+  {
+    "codigo": "472AC278",
+    "nombre": "Von Humboldt",
+    "distrito": "LA MOLINA",
+    "lat": -12.08221,
+    "lon": -76.93944,
+    "alt_m": 247,
+    "tipo": "automatica (EMA)",
+    "archivo": "472AC278_2025_03.csv"
+  },
+  {
+    "codigo": "112278",
+    "nombre": "Ceres",
+    "distrito": "ATE",
+    "lat": -12.02867,
+    "lon": -76.92711,
+    "alt_m": 339,
+    "tipo": "automatica (EMA)",
+    "archivo": "112278_2025_03.csv"
+  },
+  {
+    "codigo": "111290",
+    "nombre": "Ñaña",
+    "distrito": "LURIGANCHO",
+    "lat": -11.98744,
+    "lon": -76.84194,
+    "alt_m": 553,
+    "tipo": "automatica (EMA)",
+    "archivo": "111290_2025_03.csv"
+  }
+]
