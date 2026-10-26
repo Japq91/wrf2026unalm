@@ -247,20 +247,19 @@ table.cmp tr:nth-child(even) td { background: var(--gris-100); }
 </section>
 <section class="slide">
   <div class='slide-kicker'>Práctica de hoy</div>
-  <h2>Instalación desde el repositorio del curso</h2>
+  <h2>El entorno ya instalado (antes_del_curso.md)</h2>
   
-  <div class="slide-body top"><pre class="code-block"><span class="c1"># 1. Clonar el repositorio del curso</span>
-git clone https://github.com/Japq91/wrf2026unalm.git
-cd wrf2026unalm
+  <div class="slide-body top"><pre class="code-block"><span class="c1"># Ya lo hicieron antes del curso: git clone + conda env create</span>
+<span class="c1"># (si no, sigan antes_del_curso.md; no repitan conda env create)</span>
 
-<span class="c1"># 2. Crear el entorno a partir de environment.yml</span>
-conda env create -f environment.yml
-
-<span class="c1"># 3. Activar (¡en cada terminal nueva!)</span>
+<span class="c1"># Activar (¡en cada terminal nueva!)</span>
 conda activate wrf2026
 
 <span class="c1"># Al empezar cada clase: traer el material nuevo</span>
-git pull</pre></div>
+cd wrf2026unalm
+git pull
+
+<span class="c1"># Trabajen siempre en una copia: File → Save Notebook As… → nombre_mio.ipynb</span></pre></div>
 </section>
 <section class="slide">
   <div class='slide-kicker'>Verificación</div>
@@ -377,7 +376,7 @@ print(temperaturas)  <span class="c1"># [18.2, 19.0, 20.1, 21.5]</span></pre></d
 </section>
 <section class="slide">
   <div class='slide-kicker'>Anidamiento</div>
-  <h2>Listas de diccionarios</h2>
+  <h2>Diccionarios anidados</h2>
   
   <div class="slide-body top"><pre class="code-block">estaciones = {
     "Von Humboldt": {"lat": -12.082, "lon": -76.939, "temp": [21.7, 21.5]},
@@ -460,8 +459,8 @@ estaciones["Ceres"]["lat"]   <span class="c1"># -12.029</span></pre></div>
 <section class="slide slide--transition">
   <div class="icon">💻</div>
   <h2>Pasamos a la práctica (3 h)</h2>
-  <p class="lead">Notebook: 02_practica_dia1.ipynb — 4 ejercicios</p>
-  <div class="slide-body top"><ol class="practice-list"><li><strong>Estadísticas manuales</strong> sobre las temperaturas reales de un día en La Molina (sin NumPy todavía).</li><li><strong>Diccionarios anidados</strong> — 5 estaciones de SENAMHI en Lima, y dónde faltan datos.</li><li><strong>Script independiente</strong> — <code>clasificar_precipitacion.py</code>, ejecutado desde la terminal.</li><li>Cierre y dudas.</li></ol></div>
+  <p class="lead">Notebook: 02_practica_dia1.ipynb — 4 ejercicios, cada uno con 📘 ejemplo resuelto, ✍️ tu turno y ✔️ comprobación</p>
+  <div class="slide-body top"><ol class="practice-list"><li><strong>Estadísticas manuales</strong> sobre las temperaturas reales de un día en La Molina (sin NumPy todavía).</li><li><strong>Diccionarios anidados</strong> — 5 estaciones de SENAMHI en Lima, y dónde faltan datos (2b).</li><li><strong>Clasificación</strong> de la lluvia y de la temperatura máxima diaria, con los días «sin dato».</li><li><strong>Script independiente</strong> — <code>clasificar_precipitacion.py</code> y tu propio <code>temperatura_maxima_mio.py</code>, ejecutados desde la terminal.</li></ol></div>
 </section>
 <!-- bitacora -->
 <section class="slide">

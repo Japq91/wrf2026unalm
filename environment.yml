@@ -1,26 +1,31 @@
 name: wrf2026
+# Versiones fijadas: son las que se usaron para ejecutar y revisar todos los
+# notebooks del curso (octubre de 2026). Así todos los participantes tienen
+# el mismo entorno. Si el docente cambia una versión, actualiza tu entorno con
+#   conda env update -f environment.yml --prune
 channels:
   - conda-forge
 dependencies:
   - python=3.11
-  - numpy
-  - pandas
-  - xarray
-  - matplotlib
-  - cartopy
-  - cfgrib
-  - eccodes
-  - netcdf4
-  - scipy
-  - pyproj
-  - geopandas
-  - herbie-data
-  - tcsh
-  - jupyterlab
-  - ipykernel
-  - pillow
+  - numpy=2.4.6
+  - pandas=3.1.0
+  - xarray=2026.9.0
+  - matplotlib=3.11.2
+  - cartopy=0.26.0
+  - cfgrib=0.9.15.1
+  - eccodes=2.50.0
+  - netcdf4=1.7.4
+  - scipy=1.17.1
+  - pyproj=3.7.2
+  - geopandas=1.2.0
+  - herbie-data=2026.9.2
+  - tcsh=6.24.16
+  - jupyterlab=4.6.4
+  - ipykernel=7.4.0
+  - ipywidgets=8.1.9      # barras de progreso en Jupyter (evita el aviso TqdmWarning)
+  - pillow=13.0.0
   - pip
   - pip:
-      - cdsapi
-      - xwrf
-      - SkillMetrics
+      - cdsapi==0.7.7
+      - xwrf==0.0.5
+      - SkillMetrics==1.2.5

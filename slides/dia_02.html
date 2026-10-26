@@ -323,7 +323,7 @@ promedio = arr.mean()</pre></div>
   <div class='slide-kicker'>Ejemplo</div>
   <h2>De horario a promedio diario</h2>
   
-  <div class="slide-body top"><pre class="code-block">serie_horaria = ds["temperatura"].sel(estacion="Lima").to_series()
+  <div class="slide-body top"><pre class="code-block">serie_horaria = ds["temperatura"].sel(estacion="Campo de Marte").to_series()
 
 diaria = serie_horaria.resample("1D").mean()
 maximos_mensuales = serie_horaria.resample("1ME").max()</pre></div>

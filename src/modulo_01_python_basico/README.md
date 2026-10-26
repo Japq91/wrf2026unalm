@@ -100,16 +100,14 @@ de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar
 
 ### Práctica (3 h)
 
-1. **Instalación del entorno desde el repositorio del curso (30 min).**
-   Con Miniconda ya instalado (requisito previo del curso, comunicado
-   antes del inicio), cada participante clona el repositorio del curso y
-   crea el entorno a partir del
-   [`environment.yml`](../../environment.yml) versionado en la raíz del
-   repositorio, en vez de instalar librerías una por una:
+1. **Revisión del entorno (30 min).** El repositorio ya está clonado y el
+   entorno ya está creado desde el
+   [`environment.yml`](../../environment.yml) (guía
+   [`antes_del_curso.md`](../../antes_del_curso.md)). **No se repite
+   `conda env create`**: si alguien no lo hizo, lo hace ahora siguiendo
+   esa guía. Se activa el entorno y se verifica que quedó bien:
    ```bash
-   git clone https://github.com/Japq91/wrf2026unalm.git
    cd wrf2026unalm
-   conda env create -f environment.yml
    conda activate wrf2026
    ```
    Verificación de que el entorno quedó bien creado y activo:
@@ -124,7 +122,10 @@ de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar
    git pull
    ```
    `git clone` descarga el repositorio una sola vez; `git pull` trae solo
-   lo que cambió desde la última vez. Si el `environment.yml` cambió, el
+   lo que cambió desde la última vez. Para que `git pull` no choque con
+   tus cambios, trabaja siempre en una copia de cada notebook con el sufijo
+   `_mio` (*File → Save Notebook As…*, en la misma carpeta; ver
+   `antes_del_curso.md`, sección 5). Si el `environment.yml` cambió, el
    entorno se actualiza con `conda env update -f environment.yml --prune`,
    sin recrearlo.
 2. **Ejercicio guiado — tipos y estructuras (45 min).** A partir de una
@@ -153,9 +154,14 @@ de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar
    real: en marzo casi no llueve en Lima.
 5. **Cierre y dudas (15 min).**
 
-**Entregable del día:** script `clasificar_precipitacion.py` + notebook con
-los ejercicios de estaciones, ambos en la carpeta de trabajo del
-participante (se sugiere `practicas/dia_01/`).
+En el notebook, cada ejercicio trae un **📘 ejemplo resuelto** (otra
+estación u otro día) y un **✍️ tu turno** que el participante escribe, con
+una celda **✔️ comprobar** que le dice si su resultado es correcto.
+
+**Entregable del día**, en la carpeta `notebooks/` del módulo (así las
+rutas a `data/` siguen funcionando): tu copia `02_practica_dia1_mio.ipynb`
+con las comprobaciones en ✅, el script `clasificar_precipitacion.py` y tu
+script `temperatura_maxima_mio.py`.
 
 ---
 
@@ -288,8 +294,11 @@ real, no construido a mano.
    manejo temporal, Matplotlib para la figura final), como ensayo general
    del tipo de flujo que se repetirá en cada módulo siguiente.
 
-**Entregable del día:** notebook `dia_02_integracion.ipynb` con las 5
-secciones de la práctica resueltas y comentadas.
+**Entregable del día:** tu copia `03_practica_dia2_mio.ipynb` con las
+comprobaciones en ✅, y tu copia de
+[`04_entregable_integrador.ipynb`](notebooks/04_entregable_integrador.ipynb)
+con la sección 7 (el mismo flujo, escrito por ti, para la humedad
+relativa) y el archivo `entregable_modulo1_mio.nc`.
 
 ---
 

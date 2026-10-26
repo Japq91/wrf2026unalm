@@ -185,7 +185,9 @@ humedad). Esto prepara la función completa del Día 5.
 4. **Descarga real de FNL por HTTPS directo (25 min).** Correr (o revisar
    línea a línea, si la red del laboratorio bloquea el puerto usado por el
    nodo de datos de GDEX) el script `data/descarga_FNL.csh` con `tcsh
-   descarga_FNL.csh AAAAMMDD` para un ciclo de interés, y abrir el
+   descarga_FNL.csh AAAAMMDD` para un ciclo de interés, **desde la carpeta
+   `data/`** (`cd data` en la raíz del repositorio), que es donde los
+   notebooks buscan el archivo, y abrir el
    resultado con `xarray`/`cfgrib` filtrando por `typeOfLevel` (Módulo 2),
    recortando al mismo dominio pequeño usado con Herbie/cdsapi.
    **4b. SENAMHI (15 min).** El docente muestra una descarga con

@@ -33,14 +33,30 @@ estructura fija:
 3. `03_..._practica...ipynb` — segundo bloque de ejercicios de práctica.
 4. `04_entregable_...ipynb` — ejercicio integrador/entregable del módulo.
 
-Todos los notebooks están **ejecutados de punta a punta y sin errores**
-(entorno `jap`, ver detalle de versiones en cada notebook) y usan **datos
-sintéticos autocontenidos**: no requieren credenciales de Copernicus CDS ni
-conexión a internet para correr. Donde el curso real usa una librería que sí
-necesita credenciales (`cdsapi`) o una fuente remota (`Herbie`), el código
-real se muestra igual como referencia (comentado o en un bloque de código
-en el README/notebook), y la ejecución efectiva usa un generador local
-equivalente en estructura y formato de archivo.
+En los Días 1 a 3, cada ejercicio de práctica tiene tres partes:
+
+- **📘 Ejemplo resuelto:** se ejecuta y se lee; es el modelo a imitar.
+- **✍️ Tu turno:** un problema parecido que escribe el participante. La
+  celda corre sin errores aunque esté incompleta; hay que completar las
+  líneas marcadas con `✍️`.
+- **✔️ Comprobar:** responde `✅`, `❌` con una pista, o `⏳` si todavía
+  no se completó nada.
+
+Los notebooks se ejecutaron de punta a punta con el entorno `wrf2026` de
+[`environment.yml`](../environment.yml) (versiones fijadas). **Qué datos usa
+cada módulo:**
+
+| Módulo | Datos |
+|---|---|
+| 1 | Reales: estaciones de SENAMHI en `data/senamhi/` |
+| 2 | Ejemplos resueltos **sintéticos** (`synth_data.py`); los «tu turno», ERA5 **real** de `data/era_muestra/` |
+| 3 | **Descargas reales** por internet: GFS (Herbie, sin cuenta), ERA5 (`cdsapi`, con la cuenta de Copernicus de `antes_del_curso.md`) y FNL (`data/descarga_FNL.csh`) |
+| 4 y 5 | Reales: `wrfout` recortado (`data/grid_muestra/`), ERA5-Land y observaciones SYNOP incluidos en `data/` |
+| 6 | Etapa 3 (validación) real: GFS (Herbie, con copia en `data/modelos/`) y estaciones. Etapas 1 y 2 **sintéticas** (`synth_data_*.py`), avisado en cada notebook |
+
+Para trabajar sin perder cambios ni bloquear `git pull`, cada participante
+guarda su copia con el sufijo `_mio` (ver
+[`antes_del_curso.md`](../antes_del_curso.md), sección 5).
 
 ## Convenciones usadas en todos los módulos
 
@@ -60,5 +76,6 @@ equivalente en estructura y formato de archivo.
 - La práctica de cada día está dimensionada para 3 horas, con tiempos
   orientativos por ejercicio.
 - Los datasets de muestra (`wrfout`, datos de estaciones, reanálisis
-  recortados) referidos en los módulos se distribuyen aparte, en el
-  repositorio de material del curso.
+  recortados) vienen en la carpeta [`data/`](../data/) de este mismo
+  repositorio (ver su `README.md`). Lo único que no viene es lo que se
+  descarga en el Módulo 3.

@@ -196,7 +196,7 @@ jupyter lab</pre></div>
   <div class='slide-kicker'>Misma herramienta, distinto eje</div>
   <h2>Serie puntual vs. promedio espacial</h2>
   <div class="two-col"><div class="col-box acc-teal"><h3>Serie temporal en un punto</h3><ul class='bullets'>
-<li><code>.sel(y=..., x=...)</code></li>
+<li><code>.isel(y=iy, x=ix)</code> (la celda más cercana)</li>
 <li>Conserva la dimensión <code>Time</code></li>
 <li>Caracteriza la variabilidad LOCAL</li>
 </ul></div><div class="col-box acc-azul"><h3>Promedio espacial</h3><ul class='bullets'>

@@ -237,8 +237,9 @@ de creerle a un mapa o a un número sacado de un `wrfout`.
    introducida en el Módulo 3.
 6. **Cierre y dudas (20 min).**
 
-**Entregable del módulo:** notebook `dia_07_series_animaciones.ipynb`,
-archivo `.gif` de la animación, y el NetCDF de productos derivados
+**Entregable del módulo:** tus copias de
+`03_practica_dia7_series.ipynb` y `04_entregable_animacion.ipynb`, el
+archivo `.gif` de la animación y el NetCDF de productos derivados
 exportado.
 
 ---

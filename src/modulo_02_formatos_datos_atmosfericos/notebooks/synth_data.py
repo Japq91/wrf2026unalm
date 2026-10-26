@@ -17,7 +17,7 @@ def era5_like_dataset(lat_first=10.0, lat_last=-20.0, lon_first=-82.0, lon_last=
     time = pd.date_range(start, periods=periods, freq=freq)
 
     lat2d, lon2d = np.meshgrid(latitude, longitude, indexing="ij")
-    # Campo base de temperatura: mas frio hacia el sur y hacia la cordillera (oeste)
+    # Campo base de temperatura: mas frio hacia el sur y hacia la cordillera (este)
     base = 295 - 0.3 * (lat_first - lat2d) - 0.15 * (lon2d - lon_first)
     ciclo_diurno = 3 * np.sin((time.hour.values - 9) / 24 * 2 * np.pi)
 

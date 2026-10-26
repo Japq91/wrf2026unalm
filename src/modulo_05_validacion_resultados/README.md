@@ -69,6 +69,11 @@ grilla. Se decide entre `.sel(method="nearest")` e `.interp(method="linear")`
 según qué tan suave sea la variable en el espacio (temperatura: interpolar;
 precipitación convectiva, muy heterogénea espacialmente: el vecino más
 cercano puede ser más honesto que "inventar" un valor intermedio).
+En la práctica de hoy, con el `wrfout`, se usa el **punto de grilla más
+cercano**: su latitud y longitud son tablas 2D (Módulo 4) y `.interp()` solo
+interpola sobre coordenadas 1D como las de ERA5. Con celdas de pocos
+kilómetros, la diferencia con la interpolación bilineal es pequeña para la
+temperatura.
 
 **3. Métricas de error: qué mide cada una (~50 min)**
 Cada métrica responde una pregunta distinta sobre el error. Ejemplo para
@@ -226,10 +231,11 @@ error sin una medida de patrón, por la razón discutida el Día 8.
    a `.csv`.
 5. **Cierre y dudas (20 min).**
 
-**Entregable del módulo:** notebook `dia_09_validacion_completa.ipynb` con
-el diagrama de Taylor (SkillMetrics, referencia + 2 modelos), la tabla de
-*added value*, y el archivo `.csv` con la validación automatizada de todas
-las estaciones.
+**Entregable del módulo:** tus copias de
+`03_practica_dia9_taylor_addedvalue.ipynb` (diagrama de Taylor con
+SkillMetrics, referencia + 2 modelos) y `04_entregable_automatizacion.ipynb`
+(tabla de *added value* y archivo `.csv` con la validación automatizada de
+todas las estaciones).
 
 ---
 

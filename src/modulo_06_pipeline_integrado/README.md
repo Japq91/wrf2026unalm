@@ -120,12 +120,16 @@ llevar el código en Git.
    caso **nuevo**, no usado en módulos anteriores: **Lima, 14 al 17 de
    marzo de 2025**, validado contra la estación Lima-Callao (aeropuerto
    Jorge Chávez) y 5 estaciones automáticas de SENAMHI.
-2. **Pasar las funciones a `pipeline/` (45 min, guiado).** Mover las
-   funciones ya construidas (`descargar_era5`, `obtener_entrada_wrf` del Módulo 3;
-   la lógica de extracción/mapas del Módulo 4; `metricas.py` y
-   `evaluar_variable` del Módulo 5) a los archivos correspondientes dentro
-   de `pipeline/`, ajustando cada una para que reciba sus parámetros desde
-   `config.py` en vez de valores fijos.
+2. **Pasar las funciones a `pipeline/` (45 min, guiado).** Revisar cómo
+   las funciones ya construidas (`descargar_era5`, `obtener_entrada_wrf`
+   del Módulo 3; la lógica de extracción/mapas del Módulo 4; `metricas.py`
+   y `evaluar_variable` del Módulo 5) quedan en los archivos de
+   `pipeline/`, recibiendo sus parámetros desde `config.py` en vez de
+   valores fijos. El notebook escribe esos archivos; la tarea es leerlos y
+   reconocer de qué módulo viene cada función. **Ojo:** en el curso,
+   `descargar_era5()` es **sintética** (genera un ERA5 de práctica, sin
+   pasar por la cola de Copernicus); en un proyecto propio se reemplaza
+   por la descarga real del Módulo 3.
 3. **Correr todo de punta a punta (45 min).** Desde
    [`03_practica_ejecucion_completa.ipynb`](notebooks/03_practica_ejecucion_completa.ipynb), ejecutar el flujo completo sobre
    el caso Lima: descargar y verificar datos de entrada → generar el mapa
@@ -149,15 +153,20 @@ llevar el código en Git.
    entregable de evaluación del curso completo.
 5. **Guardar el proyecto con Git (15 min).** Git guarda la historia del
    proyecto: qué cambió y cuándo, y permite volver atrás si algo se rompe.
-   Desde la carpeta `proyecto_demo/`:
+   Desde la carpeta de los notebooks del módulo:
    ```bash
+   cp ../../../environment.yml proyecto_demo/
+   cp 04_entregable_proyecto_final.ipynb proyecto_demo/notebooks/
+   cd proyecto_demo
    git init                          # empezar a llevar historia aquí
-   echo "datos/" > .gitignore        # los datos pesados NO se guardan en Git
-   echo "resultados/" >> .gitignore  # se pueden volver a generar
+   printf "datos/\nresultados/\n__pycache__/\n" > .gitignore   # lo que NO se guarda
    git add .
    git commit -m "Pipeline del proyecto final"
    git log --oneline                 # ver la historia
    ```
+   Si `git commit` responde *Author identity unknown*, falta configurar el
+   nombre y el correo (ver [`antes_del_curso.md`](../../antes_del_curso.md),
+   sección 5).
    La regla: en Git va el **código** y la configuración (`pipeline/`,
    `config.py`, el notebook, `environment.yml`), no los datos descargados
    ni los resultados, que pesan mucho y se vuelven a generar corriendo el
@@ -239,10 +248,10 @@ observaciones, las métricas y los gráficos no cambian.
 
 **Después del curso, ¿cómo reemplazo los datos sintéticos por datos
 reales?**
-Cada función de `pipeline/descarga.py` que en el curso usa un generador
-local (por no tener credenciales/datos reales disponibles durante las
-prácticas) tiene una versión real ya explicada en el Módulo 3 (`cdsapi`,
-`Herbie`). El cambio es puntual: dentro de esa función, reemplazar la
+En el curso, `descargar_era5()` de `pipeline/descarga.py` usa un generador
+local (para que el pipeline corra en clase sin esperar la cola de
+Copernicus), y la salida del WRF de la Etapa 2 también es simulada. La
+descarga real ya la hiciste en el Módulo 3 (`cdsapi`, `Herbie`). El cambio es puntual: dentro de esa función, reemplazar la
 llamada al generador sintético por la llamada real a la librería
 correspondiente, manteniendo la misma firma de parámetros — el resto del
 pipeline (visualización, validación) no necesita cambiar, porque solo le
