@@ -198,7 +198,7 @@ jupyter lab</pre></div>
   
   <div class="slide-body top"><ul class='bullets'>
 <li><strong>Observación</strong>: la referencia (en nuestro caso, una estación).</li>
-<li><strong>Modelo global o reanálisis</strong> (ERA5, ERA5-Land o GFS), interpolado al punto de la estación con <code>.interp()</code> (Módulo 2).</li>
+<li><strong>Modelo global o reanálisis</strong> (ERA5, ERA5-Land o GFS): el punto de grilla más cercano a la estación, igual que con el WRF.</li>
 <li><strong>WRF</strong>: el punto de grilla más cercano a la estación (Día 8).</li>
 <li><strong>Valor añadido</strong>: el WRF tiene mejores métricas que el modelo global frente a la misma observación.</li>
 </ul></div>
@@ -227,8 +227,8 @@ jupyter lab</pre></div>
   <div class='slide-kicker'>En código</div>
   <h2>Comparar modelo global vs. WRF contra la misma observación</h2>
   
-  <div class="slide-body top"><pre class="code-block">modelo_global_en_estacion = interpolar(era5_o_gfs, lat_estacion, lon_estacion)
-wrf_en_estacion = interpolar(wrf, lat_estacion, lon_estacion)
+  <div class="slide-body top"><pre class="code-block">modelo_global_en_estacion = punto_mas_cercano(era5_o_gfs, lat_estacion, lon_estacion)
+wrf_en_estacion = punto_mas_cercano(wrf, lat_estacion, lon_estacion)
 
 tabla = pd.DataFrame({
     "Modelo global": {"RMSE": rmse(modelo_global_en_estacion, obs), "KGE": kge(modelo_global_en_estacion, obs)},

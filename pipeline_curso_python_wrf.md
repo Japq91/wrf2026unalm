@@ -71,9 +71,11 @@ pero sin experiencia en programación. Por eso:
 - **Copias personales:** cada participante guarda sus notebooks como
   `*_mio.ipynb`. Git ignora esos archivos, así que `git pull` no choca con el
   trabajo propio.
-- **Verificación automática:** en cada cambio, GitHub Actions ejecuta de punta
-  a punta los notebooks que no dependen de descargas (Módulos 1, 2, 4, 5 y 6).
-  Así se comprueba que el material corre con el entorno fijado. Las descargas
+- **Verificación de los notebooks:** los notebooks que no dependen de
+  descargas (Módulos 1, 2, 4, 5 y 6) se ejecutan de punta a punta con
+  `pytest --nbmake`, para comprobar que el material corre con el entorno
+  fijado. El flujo de GitHub Actions que lo hará en cada cambio está
+  preparado, pero todavía no está en el repositorio. Las descargas
   del Módulo 3 (CDS, FNL, GFS) se prueban en las máquinas de los
   participantes, porque dependen de credenciales y de servicios externos.
 

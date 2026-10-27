@@ -65,8 +65,8 @@ Con el `wrfout` usamos el **punto de grilla más cercano**, igual que en el
 Módulo 4: su latitud y su longitud son tablas 2D y `.interp()` solo
 funciona con coordenadas 1D como las de ERA5. Con celdas de pocos
 kilómetros, para la temperatura la diferencia con una interpolación es
-pequeña. Para ERA5-Land, que sí tiene coordenadas 1D, el Día 9 usamos
-`.interp()`.
+pequeña. Con ERA5-Land, aunque tiene coordenadas 1D, también tomamos el
+punto más cercano, para tratar a los dos modelos de la misma forma.
 
 **3. Métricas de error: qué mide cada una (~50 min)**
 Cada métrica responde una pregunta distinta sobre el error. Ejemplo para
@@ -197,7 +197,7 @@ variable y reportar RMSE o MAE junto con r o KGE (por lo visto el Día 8).
    (Ezeiza, Rosario, Resistencia, Iguazú, Carrasco).
 3. **Cálculo de added value (50 min).** Para la misma estación de
    referencia (Salto), repetir la comparación del Día 8 con ERA5-Land
-   interpolado en lugar del WRF, calcular las mismas métricas y armar una
+   en lugar del WRF, calcular las mismas métricas y armar una
    tabla WRF contra observación y ERA5-Land contra observación. ¿Hay valor
    añadido para esa variable?
 4. **Automatización multi-estación (50 min).** Implementar
@@ -280,14 +280,14 @@ o si r es negativo. Un KGE negativo indica un ajuste malo, no un error de
 cálculo. Revisen $r$, $\beta$ y $\alpha$ por separado para ver cuál lo
 baja.
 
-**¿Por qué con el WRF usamos el punto más cercano y con ERA5-Land
-interpolamos?**
-Porque `.interp()` necesita coordenadas 1D, como las de ERA5-Land, y el
-`wrfout` tiene `XLAT`/`XLONG` en 2D. Interpolar el WRF se puede hacer (por
-ejemplo con `scipy` o con `xesmf`), pero con celdas de pocos km la
-diferencia en temperatura es pequeña, y en el curso preferimos el método
-que ya conocen del Módulo 4. ERA5-Land tiene celdas de 9 km, así que ahí
-interpolar sí cambia más el resultado.
+**¿Por qué no interpolamos a la estación?**
+Porque `.interp()` necesita coordenadas 1D, y el `wrfout` tiene
+`XLAT`/`XLONG` en 2D. Interpolar el WRF se puede hacer (por ejemplo con
+`scipy` o con `xesmf`), pero con celdas de pocos km la diferencia en
+temperatura es pequeña, y en el curso preferimos el método que ya conocen
+del Módulo 4. A ERA5-Land le aplicamos el mismo criterio para que la
+comparación sea pareja. Como sus celdas son de 9 km, interpolar cambiaría
+algo más el resultado: pueden probarlo con `.interp()` y comparar.
 
 **Si mi caso de estudio no tiene estaciones cercanas, ¿puedo saltarme este
 módulo?**
