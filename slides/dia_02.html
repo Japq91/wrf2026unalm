@@ -188,20 +188,20 @@ jupyter lab</pre></div>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>El experimento de ayer, recordado</div>
+  <div class='slide-kicker'>Lo que hicimos ayer</div>
   <h2>Calcular estadísticas con bucles</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Ayer calculamos promedio/máximo/mínimo/conteo con bucles y acumuladores manuales.</li>
-<li>Funciona, pero: cada iteración de un bucle Python <strong>reevalúa el tipo</strong> de cada elemento (tipado dinámico).</li>
+<li>Ayer calculamos promedio, máximo, mínimo y conteo con bucles y acumuladores.</li>
+<li>Funciona, pero en cada vuelta del bucle Python vuelve a revisar <strong>el tipo</strong> de cada elemento (tipado dinámico).</li>
 <li>NumPy almacena datos de <strong>un solo tipo</strong> en un bloque contiguo de memoria y opera en código C compilado.</li>
 </ul></div>
 </section>
 <section class="slide slide--check">
   <div class="icon">⏱️</div>
   <h2>¿Cuánto más rápido creen que es NumPy?</h2>
-  <p class="lead">Sobre un arreglo de 2 millones de valores, calculando promedio/máx/mín/conteo.</p>
-  <div class='hint'>Órdenes de magnitud, no porcentajes. Lo vemos medido en la práctica.</div>
+  <p class="lead">Con 2 millones de valores, calculando promedio, máximo, mínimo y conteo.</p>
+  <div class='hint'>Piensen en veces más rápido, no en porcentajes. En la práctica lo medimos.</div>
 </section>
 <section class="slide">
   <div class='slide-kicker'>El mismo cálculo, dos formas</div>
@@ -218,14 +218,14 @@ arr = np.array(datos)
 promedio = arr.mean()</pre></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>NumPy: lo esencial</div>
+  <div class='slide-kicker'>NumPy</div>
   <h2>Arreglos, formas y reducción</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><code>dtype</code> — el tipo de dato de TODOS los elementos del arreglo (ej. <code>float32</code>); a diferencia de una lista Python, no puede mezclar tipos.</li>
-<li><code>shape</code> — el tamaño de cada dimensión, como una tupla. Ej.: <code>(24, 30, 40)</code> es un arreglo de 3 dimensiones (<code>ndim=3</code>) con 24, 30 y 40 elementos en cada eje respectivamente.</li>
-<li>Indexado y slicing multidimensional: <code>arr[:, 0]</code> ("todos los elementos del primer eje, solo el índice 0 del segundo"), <code>arr[1:3, :]</code>.</li>
-<li>Reducciones: <code>mean</code>, <code>std</code>, <code>max</code>, <code>min</code> — con el parámetro <strong><code>axis</code></strong>, que indica sobre cuál dimensión se reduce (clave para todo lo que viene después).</li>
+<li><code>dtype</code>: el tipo de dato de todos los elementos (por ejemplo <code>float32</code>). A diferencia de una lista, un arreglo no mezcla tipos.</li>
+<li><code>shape</code>: el tamaño de cada dimensión. <code>(24, 30, 40)</code> es un arreglo de 3 dimensiones (<code>ndim=3</code>) con 24, 30 y 40 elementos.</li>
+<li>Indexado y slicing multidimensional: <code>arr[:, 0]</code> (todo el primer eje, solo la posición 0 del segundo), <code>arr[1:3, :]</code>.</li>
+<li>Reducciones: <code>mean</code>, <code>std</code>, <code>max</code>, <code>min</code>. El parámetro <strong><code>axis</code></strong> dice sobre qué dimensión se reduce; lo usaremos todo el curso.</li>
 </ul></div>
 </section>
 <section class="slide">
@@ -233,8 +233,8 @@ promedio = arr.mean()</pre></div>
   <h2>Operar arreglos de formas distintas sin bucles</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>NumPy <strong>"estira"</strong> el arreglo más chico para que calce con el más grande, sin escribir bucles.</li>
-<li>Ejemplo: una grilla <code>(niveles, lat, lon)</code> y una corrección distinta para cada nivel (5 valores).</li>
+<li>NumPy <strong>repite</strong> el arreglo más chico para que calce con el más grande, sin bucles.</li>
+<li>Por ejemplo, una grilla <code>(niveles, lat, lon)</code> y una corrección distinta para cada uno de sus 5 niveles.</li>
 <li>Para que NumPy sepa que esos 5 valores van <strong>por nivel</strong>, se les da la forma <code>(5, 1, 1)</code>: <code>correccion[:, np.newaxis, np.newaxis]</code>. NumPy repite cada valor en toda su capa.</li>
 <li>Si las formas no calzan, NumPy da error: imprimir <code>.shape</code> de cada arreglo suele mostrar el problema.</li>
 </ul></div>
@@ -243,23 +243,23 @@ promedio = arr.mean()</pre></div>
   <div class='slide-kicker'>Broadcasting</div>
   <h2>Perfil vertical + grilla horizontal</h2>
   <div class="formula-box ">grilla<sub>(niveles, lat, lon)</sub> + perfil<sub>(niveles, 1, 1)</sub> → resultado<sub>(niveles, lat, lon)</sub></div>
-  <p class='lead'>El perfil se "expande" virtualmente sobre lat/lon sin copiar datos en memoria.</p>
+  <p class='lead'>El perfil se aplica a cada punto lat/lon sin copiarlo en memoria.</p>
   <div class="slide-body top"></div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">2</div>
     <h2>Xarray: arreglos con nombre</h2>
-    <p class="lead">La estructura que vamos a usar en el resto del curso</p>
+    <p class="lead">Lo que usaremos el resto del curso</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>El problema</div>
-  <h2>Un arreglo NumPy "olvida" qué es cada eje</h2>
+  <div class='slide-kicker'>Lo que le falta a NumPy</div>
+  <h2>Un arreglo NumPy no sabe qué es cada eje</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><code>(24, 30, 40)</code> — ¿tiempo, lat, lon? ¿nivel, lat, lon? Hay que recordarlo mentalmente o llevar la cuenta en comentarios.</li>
-<li>Frágil, y fuente común de errores silenciosos al analizar datos de modelos.</li>
+<li><code>(24, 30, 40)</code>: ¿tiempo, lat, lon? ¿nivel, lat, lon? Hay que recordarlo o anotarlo en comentarios.</li>
+<li>Si nos equivocamos de eje, el código corre igual y el resultado está mal.</li>
 </ul></div>
 </section>
 <section class="slide">
@@ -270,7 +270,7 @@ promedio = arr.mean()</pre></div>
 <li>Ej.: <code>temperatura</code> indexada por <code>tiempo</code> y <code>estacion</code></li>
 </ul></div><div class="col-box acc-azul"><h3>Dataset</h3><ul class='bullets'>
 <li>Colección de DataArray que comparten dimensiones</li>
-<li>Análogo a una tabla con varias columnas, pero en N dimensiones</li>
+<li>Como una tabla con varias columnas, pero en N dimensiones</li>
 </ul></div></div>
 </section>
 <section class="slide">
@@ -285,28 +285,28 @@ promedio = arr.mean()</pre></div>
 )</pre></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>La distinción más importante del curso</div>
+  <div class='slide-kicker'>La usaremos en todos los módulos</div>
   <h2>.sel() por nombre vs. .isel() por posición</h2>
   <div class="slide-body top">
-    <table class="cmp"><thead><tr><th></th><th>.sel(estacion="Ceres")</th><th>.isel(estacion=3)</th></tr></thead><tbody><tr><td>Busca por</td><td><strong>nombre/coordenada</strong></td><td>posición numérica</td></tr><tr><td>Frágil si...</td><td>nunca (el nombre no cambia)</td><td>el orden de carga cambia</td></tr><tr><td>Se usa desde</td><td>Módulo 2 en adelante, siempre que se pueda</td><td>cuando de verdad se necesita la posición</td></tr></tbody></table>
+    <table class="cmp"><thead><tr><th></th><th>.sel(estacion="Ceres")</th><th>.isel(estacion=3)</th></tr></thead><tbody><tr><td>Busca por</td><td><strong>nombre/coordenada</strong></td><td>posición numérica</td></tr><tr><td>Falla si...</td><td>el nombre no existe</td><td>el orden de carga cambia</td></tr><tr><td>Se usa desde</td><td>Módulo 2 en adelante, siempre que se pueda</td><td>cuando de verdad se necesita la posición</td></tr></tbody></table>
   </div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🎯</div>
   <h2>¿Por qué .sel() es más seguro que .isel()?</h2>
   <p class="lead">Imaginen que mañana el archivo de datos llega con las estaciones en otro orden.</p>
-  <div class='hint'>Esta pregunta es literalmente el checkpoint de cierre del Módulo 1 — anótenla.</div>
+  <div class='hint'>Es la pregunta de cierre del Módulo 1; anótenla.</div>
 </section>
 <section class="slide slide--quote">
-  <blockquote>Un archivo wrfout es exactamente esta clase de estructura: dimensiones Time, bottom_top, south_north, west_east.</blockquote>
-  <p class='context'>Sin entrar en detalle todavía: bottom_top es el eje vertical (los niveles del modelo, de la superficie hacia arriba), y south_north / west_east son los ejes horizontales de la grilla del WRF. El Módulo 4 explica cada uno a fondo.</p>
-  <div class="attrib">Todavía no lo tocamos en profundidad (eso es el Módulo 4) — pero ya sabemos con qué estamos tratando.</div>
+  <blockquote>Un wrfout tiene esta misma estructura, con dimensiones Time, bottom_top, south_north y west_east.</blockquote>
+  <p class='context'>bottom_top es el eje vertical (los niveles del modelo, de la superficie hacia arriba); south_north y west_east son los ejes horizontales de la grilla.</p>
+  <div class="attrib">Lo vemos en detalle en el Módulo 4.</div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">3</div>
     <h2>Pandas para series temporales</h2>
-    <p class="lead">El formato natural de un registro horario de estación</p>
+    <p class="lead">Para los datos horarios de una estación</p>
   </div>
 </section>
 <section class="slide">
@@ -314,9 +314,9 @@ promedio = arr.mean()</pre></div>
   <h2>Datos tabulares indexados en el tiempo</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><code>DatetimeIndex</code>: usar fechas reales como índice (en vez de un número de fila) habilita seleccionar <code>serie["2026-01"]</code> ("todo enero") o filtrar por hora, de forma declarativa — sin escribir un <code>if</code> comparando fechas manualmente.</li>
-<li><code>resample("1D").mean()</code>: agregación temporal. Ejemplo concreto: 168 datos horarios (una semana) se convierten en 7 promedios diarios con una sola línea.</li>
-<li>Es una generalización de <code>groupby</code> sobre intervalos de tiempo — agrupa por "cada día" o "cada mes" en vez de por una columna categórica.</li>
+<li><code>DatetimeIndex</code>: con las fechas como índice se puede escribir <code>serie["2026-01"]</code> para tener todo enero, o filtrar por hora, sin comparar fechas con <code>if</code>.</li>
+<li><code>resample("1D").mean()</code>: pasa 168 datos horarios (una semana) a 7 promedios diarios en una línea.</li>
+<li>Es un <code>groupby</code> por intervalos de tiempo: agrupa por día o por mes en vez de por una columna.</li>
 </ul></div>
 </section>
 <section class="slide">
@@ -332,14 +332,14 @@ maximos_mensuales = serie_horaria.resample("1ME").max()</pre></div>
   <div class="slide-body">
     <div class="num">4</div>
     <h2>Matplotlib: Figure y Axes</h2>
-    <p class="lead">El modelo mental detrás de cada gráfico del curso</p>
+    <p class="lead">Cómo está armado cada gráfico del curso</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Dos objetos, no uno</div>
+  <div class='slide-kicker'>Dos objetos</div>
   <h2>Figure (el lienzo) vs. Axes (los ejes)</h2>
   <div class="two-col"><div class="col-box acc-azul"><h3>Figure</h3><ul class='bullets'>
-<li>El "lienzo" completo</li>
+<li>El lienzo completo</li>
 <li>Puede contener varios Axes (paneles)</li>
 </ul></div><div class="col-box acc-teal"><h3>Axes</h3><ul class='bullets'>
 <li>El sistema de ejes donde se dibuja</li>
@@ -347,7 +347,7 @@ maximos_mensuales = serie_horaria.resample("1ME").max()</pre></div>
 </ul></div></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Patrón que se repite todo el curso</div>
+  <div class='slide-kicker'>Lo escribiremos en cada gráfico</div>
   <h2>fig, ax = plt.subplots()</h2>
   
   <div class="slide-body top"><pre class="code-block">fig, ax = plt.subplots(figsize=(8, 4))
@@ -358,7 +358,7 @@ ax.legend()</pre></div>
 </section>
 <section class="slide">
   <div class='slide-kicker'>Múltiples paneles</div>
-  <h2>plt.subplots(nrows, ncols) — un arreglo de Axes</h2>
+  <h2>plt.subplots(nrows, ncols) devuelve un arreglo de Axes</h2>
   
   <div class="slide-body top"><pre class="code-block">fig, axes = plt.subplots(1, 2, figsize=(10, 4))
 
@@ -373,24 +373,24 @@ axes[1].set_title("Panel derecho")</pre></div>
   <h2>Cómo encajan las 4 librerías de hoy</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><strong>NumPy</strong> — el cálculo vectorizado de base (arreglos, broadcasting, reducciones).</li>
-<li><strong>Xarray</strong> — le pone nombre a los ejes de ese cálculo (dimensiones, coordenadas, <code>.sel</code>/<code>.isel</code>).</li>
-<li><strong>Pandas</strong> — el eje temporal (<code>DatetimeIndex</code>, <code>resample</code>).</li>
-<li><strong>Matplotlib</strong> — comunica el resultado (<code>Figure</code>/<code>Axes</code>, uno o varios paneles).</li>
-<li>El Módulo 2 retoma el <code>Dataset</code> de Xarray de hoy, pero leído desde un NetCDF/GRIB real, no construido a mano.</li>
+<li><strong>NumPy</strong> hace el cálculo (arreglos, broadcasting, reducciones).</li>
+<li><strong>Xarray</strong> le pone nombre a los ejes (dimensiones, coordenadas, <code>.sel</code>/<code>.isel</code>).</li>
+<li><strong>Pandas</strong> maneja el tiempo (<code>DatetimeIndex</code>, <code>resample</code>).</li>
+<li><strong>Matplotlib</strong> dibuja el resultado (<code>Figure</code>/<code>Axes</code>, uno o varios paneles).</li>
+<li>Mañana, en el Módulo 2, el <code>Dataset</code> ya no lo armamos a mano: lo leemos de un NetCDF o un GRIB.</li>
 </ul></div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🧩</div>
   <h2>Checkpoint de cierre del Módulo 1</h2>
   <p class="lead">¿Por qué .sel(estacion="Ceres") es preferible a .isel(estacion=3), aunque hoy den el mismo resultado?</p>
-  <div class='hint'>Esta pregunta se retoma como gancho de apertura del Módulo 2, mañana.</div>
+  <div class='hint'>Mañana empezamos con esta pregunta.</div>
 </section>
 <section class="slide slide--transition">
   <div class="icon">💻</div>
   <h2>Pasamos a la práctica (3 h)</h2>
   <p class="lead">Notebooks: 03_practica_dia2.ipynb y 04_entregable_integrador.ipynb</p>
-  <div class="slide-body top"><ol class="practice-list"><li><strong>De bucles a NumPy</strong> — reescribir el ejercicio del Día 1.</li><li><strong>Broadcasting con sentido físico</strong> — perfil vertical + grilla inventada.</li><li><strong>Primer DataArray/Dataset</strong> — 5 estaciones SENAMHI × 72 horas.</li><li><strong>Serie temporal con Pandas</strong> — resample y gráfico, + refuerzo construyendo el DatetimeIndex desde el texto del CSV de SENAMHI.</li><li><strong>Entregable integrador</strong> — las 4 librerías en un solo flujo.</li></ol></div>
+  <div class="slide-body top"><ol class="practice-list"><li><strong>De bucles a NumPy</strong>: el ejercicio del Día 1, con NumPy.</li><li><strong>Broadcasting</strong>: un perfil vertical sobre una grilla de práctica.</li><li><strong>Primer DataArray y Dataset</strong>: 5 estaciones de SENAMHI × 72 horas.</li><li><strong>Serie temporal con Pandas</strong>: resample y gráfico; también se arma el DatetimeIndex desde el texto del CSV de SENAMHI.</li><li><strong>Entregable</strong>: las 4 librerías juntas.</li></ol></div>
 </section>
 <!-- bitacora -->
 <section class="slide">

@@ -8,26 +8,22 @@
 
 ## Objetivo del módulo
 
-Al finalizar el módulo, el participante podrá comparar cuantitativamente una
-simulación del WRF contra observaciones, usando un conjunto de métricas
-estadísticas complementarias (no una sola), entendiendo qué aspecto del
-error mide cada una, y podrá automatizar ese cálculo para múltiples
-variables y estaciones a la vez.
+Al terminar el módulo, el participante podrá comparar una simulación del
+WRF con observaciones usando varias métricas, explicar qué mide cada una y
+repetir el cálculo para muchas estaciones y variables con una función.
 
-## Por qué este módulo importa para el WRF
+## Relación con el WRF
 
-Un mapa bonito (Módulo 4) no demuestra que la simulación sea correcta. La
-pregunta que responde este módulo —**¿qué tan bien reproduce el WRF la
-realidad observada, y mejora algo respecto a los datos que lo forzaron?**—
-es la que finalmente le da valor científico al resto del pipeline. Sin esta
-etapa, todo lo anterior es solo procesamiento de datos; con ella, se
-convierte en evidencia.
+Que un mapa del Módulo 4 se vea bien no dice si la simulación se parece a
+lo que pasó. En este módulo respondemos dos preguntas: **¿qué tan cerca
+está el WRF de las observaciones?** y **¿mejora algo respecto del modelo
+global que lo forzó?**
 
 ## Prerrequisitos específicos
 
 Haber completado el Módulo 4 (productos derivados exportados a NetCDF,
-usados aquí como el lado "simulado" de la comparación) y el Módulo 2
-(interpolación espacial).
+que aquí son el lado simulado de la comparación) y el Módulo 2
+(interpolación).
 
 ## Antes de empezar: activar el entorno
 
@@ -39,41 +35,38 @@ Este módulo no necesita librerías nuevas.
 
 ---
 
-## Día 8 — Interpolación a observaciones y métricas de error
+## Día 8 — Del WRF a la estación y métricas de error
 
 ### Teoría (2 h)
 
-**1. Tipos de datos observacionales y una advertencia de circularidad (~25 min)**
-- **Estaciones meteorológicas superficiales:** medición directa en un punto,
-  alta confiabilidad puntual pero cobertura espacial limitada (no dicen nada
-  del punto de grilla vecino).
+**1. Tipos de observaciones, y por qué ERA5 no siempre sirve de referencia (~25 min)**
+- **Estaciones de superficie:** miden directamente en un punto. Son
+  confiables en ese punto, pero no dicen nada del punto de grilla vecino.
 - **Datos satelitales:** cubren grandes áreas, pero no miden la variable
   directamente: la estiman a partir de la radiación que capta el satélite,
   así que tienen su propio error (y huecos por nubes o por la hora en que
   pasa el satélite).
-- **Reanálisis como referencia:** útil cuando no hay observaciones directas
-  disponibles, pero con una **advertencia conceptual importante**: si el
-  WRF fue forzado con ERA5 (Módulo 3), usar el propio ERA5 como "verdad" para
-  validar el WRF es parcialmente circular — no es una fuente independiente.
-  Esto no invalida su uso, pero cambia la pregunta: ya no es "¿el WRF es
-  correcto?" sino "¿el WRF agrega algo frente a su propio forzante?" — la
-  pregunta que se retoma formalmente el Día 9 como *added value*.
+- **Reanálisis:** sirve cuando no hay observaciones, con un cuidado: si
+  el WRF se forzó con ERA5 (Módulo 3), validar el WRF contra ese mismo ERA5
+  es en parte circular, porque no es una fuente independiente. Se puede
+  usar, pero la pregunta cambia: ya no es si el WRF acierta, sino si
+  agrega algo respecto de lo que recibió. Esa es la pregunta del *added
+  value*, el Día 9.
 
-**2. Interpolar el modelo al punto de observación (~15 min)**
-Se reutiliza explícitamente la interpolación bilineal del Módulo 2, ahora en
-la dirección opuesta a la del Módulo 4: en vez de extraer una serie en el
-punto de grilla *más cercano* a una ciudad, aquí se interpola (no solo se
-selecciona el vecino más próximo) la salida del WRF a la coordenada *exacta*
-de la estación, porque la estación casi nunca coincide con un nodo de
-grilla. Se decide entre `.sel(method="nearest")` e `.interp(method="linear")`
-según qué tan suave sea la variable en el espacio (temperatura: interpolar;
-precipitación convectiva, muy heterogénea espacialmente: el vecino más
-cercano puede ser más honesto que "inventar" un valor intermedio).
-En la práctica de hoy, con el `wrfout`, se usa el **punto de grilla más
-cercano**: su latitud y longitud son tablas 2D (Módulo 4) y `.interp()` solo
-interpola sobre coordenadas 1D como las de ERA5. Con celdas de pocos
-kilómetros, la diferencia con la interpolación bilineal es pequeña para la
-temperatura.
+**2. Llevar el modelo al punto de la estación (~15 min)**
+La estación casi nunca coincide con un nodo de la grilla. En el Módulo 2
+vimos dos opciones: el punto más cercano (`.sel(method="nearest")`) o
+interpolar (`.interp(method="linear")`). Para una variable que cambia de
+forma suave, como la temperatura, interpolar suele ser mejor; para la
+lluvia convectiva, que cambia mucho en pocos kilómetros, un valor
+interpolado puede no parecerse a lo que cayó en ningún lado.
+
+Con el `wrfout` usamos el **punto de grilla más cercano**, igual que en el
+Módulo 4: su latitud y su longitud son tablas 2D y `.interp()` solo
+funciona con coordenadas 1D como las de ERA5. Con celdas de pocos
+kilómetros, para la temperatura la diferencia con una interpolación es
+pequeña. Para ERA5-Land, que sí tiene coordenadas 1D, el Día 9 usamos
+`.interp()`.
 
 **3. Métricas de error: qué mide cada una (~50 min)**
 Cada métrica responde una pregunta distinta sobre el error. Ejemplo para
@@ -95,9 +88,9 @@ arreglos NumPy:
 - **MAE y RMSE** están en las mismas unidades que la variable (°C). El RMSE
   siempre es mayor o igual que el MAE; si es bastante mayor, el error viene
   de unas pocas horas muy malas más que de un error parejo.
-- **r** solo mira la forma de la curva: un modelo que reproduce el ciclo
-  diurno perfecto pero 5 °C más caliente tiene r = 1. Por eso **ninguna
-  métrica sola alcanza**.
+- **r** solo mira la forma de la curva: un modelo que reproduce bien el
+  ciclo diurno pero está 5 °C más caliente tiene r = 1. Por eso se
+  reportan varias métricas.
 - **KGE** junta tres revisiones en un solo número: ¿sigue el patrón? (r),
   ¿acierta el promedio? (β, promedio del modelo entre el observado) y
   ¿acierta la amplitud de las subidas y bajadas? (α, variabilidad del
@@ -106,43 +99,33 @@ arreglos NumPy:
 
 Las fórmulas escritas, en [Para profundizar](#para-profundizar).
 
-Una pregunta que surge casi siempre en este punto: *"¿cuál de todas reporto
-si solo puedo mostrar una métrica?"* La respuesta corta es que no conviene
-reportar una sola: como mínimo, una medida de error absoluto (RMSE o MAE) y
-una medida de patrón (r o, mejor, KGE) juntas. Reportar solo r puede
-esconder un sesgo grande; reportar solo RMSE no dice si el error es
-sistemático o aleatorio. Esta idea —nunca una métrica sola— es el hilo
-conductor del resto del módulo.
+Casi siempre aparece la pregunta: *«si solo puedo mostrar una, ¿cuál
+reporto?»* Mejor no reportar una sola. Como mínimo, una de error (RMSE o
+MAE) y una de patrón (r o KGE). Solo r puede esconder un sesgo grande;
+solo RMSE no dice si el error es sistemático o aleatorio.
 
 ### Práctica (3 h)
 
-1. **Carga de observaciones (30 min).** Leer con Pandas la observación real
-   horaria de una estación de Perú (decodificada de mensajes SYNOP,
-   `data/obs/Lima_2024_12_13_horario.csv`), construir su `DatetimeIndex`
-   (retomando el Módulo 1) y graficar la serie cruda para inspección
-   visual. Este ejercicio es de carga pura — no requiere correspondencia
-   con el dominio del WRF.
-2. **Interpolación del WRF al punto de estación (40 min).** El dominio real
-   del WRF no cubre Perú, así que de acá en adelante se cambia a una
-   estación real dentro del dominio (Salto, Uruguay). Usando el `wrfout`
-   real de **día completo** (`data/grid_muestra/wrfout_muestra.nc`, 24
-   pasos horarios), se toma el punto de grilla más cercano a las
-   coordenadas reales de la estación y se comparan las 24 horas del WRF
-   contra la observación real de esas mismas horas.
-3. **Cálculo manual de métricas (50 min).** Implementar como funciones
-   propias (no usar directamente una librería que ya las calcule, para
-   fijar la fórmula) `calcular_mae`, `calcular_rmse`, `calcular_bias`,
-   `calcular_r` y `calcular_kge`, aplicarlas al par de series alineadas
-   (n=24), e interpretar el resultado por escrito en el notebook: ¿el
-   modelo está sesgado?, ¿qué tan bien sigue el ciclo diurno?
-4. **Caso de contraste (30 min).** Se comparan dos fuentes reales contra la
-   misma observación (WRF y ERA5-Land en Salto, día completo) — con datos
-   reales el RMSE no sale igual entre ambas, pero eso no es lo importante:
-   los dos modelos tienen sesgos parecidos en signo y magnitud, pero fallan
-   en direcciones OPUESTAS en variabilidad (`alpha`) — uno sobre-dispersa
-   el ciclo diurno, el otro lo aplana — algo invisible si solo se mira RMSE
-   o bias. El participante calcula KGE para ambas fuentes y explica en una
-   frase la diferencia física entre los dos casos.
+1. **Carga de observaciones (30 min).** Leer con Pandas la observación
+   horaria de Lima (decodificada de mensajes SYNOP,
+   `data/obs/Lima_2024_12_13_horario.csv`), armar su `DatetimeIndex`
+   (Módulo 1) y graficar la serie. Aquí solo practicamos la lectura: Lima
+   está fuera del dominio del WRF.
+2. **Del WRF al punto de estación (40 min).** Desde aquí usamos Salto
+   (Uruguay), que sí está dentro del dominio. Con el `wrfout` de **día
+   completo** (`data/grid_muestra/wrfout_muestra.nc`, 24 salidas
+   horarias), se toma el punto de grilla más cercano a la estación y se
+   comparan las 24 horas del WRF con las observadas.
+3. **Métricas escritas a mano (50 min).** Escribir `calcular_mae`,
+   `calcular_rmse`, `calcular_bias`, `calcular_r` y `calcular_kge` sin usar
+   una librería que ya las calcule, aplicarlas a las dos series (n = 24) y
+   responder en el notebook: ¿el modelo está sesgado?, ¿qué tan bien sigue
+   el ciclo diurno?
+4. **Caso de contraste (30 min).** WRF y ERA5-Land contra la misma
+   observación en Salto. Los dos tienen un sesgo parecido, pero fallan en
+   sentido contrario en la variabilidad (`alpha`): uno exagera el ciclo
+   diurno y el otro lo aplana. Con RMSE o bias no se ve. Calcular el KGE de
+   los dos y explicar la diferencia en una frase.
 5. **Cierre y dudas (10 min).**
 
 **Entregable del día:** módulo `metricas.py` con las cinco funciones +
@@ -163,15 +146,15 @@ forzó?** Se comparan, contra la misma estación, dos fuentes:
 1. el modelo global (ERA5 o GFS) en la ubicación de la estación, y
 2. el WRF en la misma ubicación.
 
-Si el WRF tiene mejores métricas, su mayor resolución está captando algo
-local que el modelo global no ve (relieve, brisas, lluvia por montaña). Si
-no las tiene, no es un error: para esa variable y ese lugar, el WRF no está
-aportando. Aquí el modelo global no hace de "verdad" (eso sería la
-circularidad del Día 8); hace del competidor contra el que se compara el WRF.
+Si el WRF tiene mejores métricas, su resolución capta algo local que el
+modelo global no ve (relieve, brisas, lluvia orográfica). Si no, para esa
+variable y ese lugar el WRF no aporta, y ese resultado también vale. Aquí
+el modelo global no es la referencia (eso sería la circularidad del
+Día 8): es el competidor del WRF.
 
 **2. Diagramas de Taylor: tres métricas en un solo gráfico (~45 min)**
-Comparar varios modelos con tres tablas de números es difícil de un
-vistazo. El diagrama de Taylor pone a cada modelo como un punto en un
+Con varios modelos, tres tablas de números se vuelven difíciles de leer.
+El diagrama de Taylor pone a cada modelo como un punto en un
 cuarto de círculo, y la observación como un punto de referencia sobre el
 eje horizontal. Se lee así:
 
@@ -181,28 +164,23 @@ eje horizontal. Se lee así:
 - **Distancia al punto de la observación:** el error (RMSE centrado). El
   mejor modelo es el punto más cercano a la observación.
 
-Que esas tres cosas encajen en un mismo dibujo no es casualidad: sale de la
-ley de cosenos (detalle en [Para profundizar](#para-profundizar)).
+Las tres caben en un mismo dibujo por la ley de cosenos (detalle en
+[Para profundizar](#para-profundizar)).
 
 **3. Automatizar el cálculo para múltiples variables y periodos (~30 min)**
-Se diseña una función `evaluar_variable(variable, estaciones, periodo)` que
-recorre una lista de estaciones y/o variables, aplica para cada una el flujo
-completo del Día 8 (alinear, calcular métricas), y acumula los resultados en
-un `DataFrame` de Pandas (una fila por combinación estación–variable, una
-columna por métrica) en vez de repetir el análisis manualmente por cada
-caso — cerrando el ciclo de automatización que empezó en el Módulo 3 con la
-descarga.
+Escribimos una función `evaluar_variable(variable, estaciones, periodo)`
+que recorre estaciones y variables, hace para cada una lo del Día 8
+(alinear y calcular métricas) y junta los resultados en un `DataFrame`
+(una fila por estación y variable, una columna por métrica).
 
 **4. Comunicar resultados: tablas resumen (~20 min)**
-Buenas prácticas mínimas para una tabla de validación presentable:
-ordenar por la métrica más relevante para el caso de uso, redondear a un
-número razonable de decimales según la magnitud física de la variable, y
-acompañar siempre RMSE/MAE de r o KGE — nunca reportar una sola métrica de
-error sin una medida de patrón, por la razón discutida el Día 8.
+Algunas reglas para una tabla de validación: ordenarla por la métrica que
+más importe para el caso, usar los decimales que tengan sentido para la
+variable y reportar RMSE o MAE junto con r o KGE (por lo visto el Día 8).
 
 ### Práctica (3 h)
 
-1. **Opcional, si sobra tiempo — un punto del diagrama a mano.**
+1. **Opcional: un punto del diagrama a mano.**
    Con las métricas ya calculadas el Día 8 para la estación de muestra
    ($\sigma_s$, $\sigma_o$, $r$), verificar a mano (con una celda de
    código, aplicando la fórmula de la teoría) que la distancia calculada
@@ -212,23 +190,19 @@ error sin una medida de patrón, por la razón discutida el Día 8.
 2. **Diagrama de Taylor con SkillMetrics (60 min).** Usando el paquete
    [`SkillMetrics`](https://github.com/PeterRochford/SkillMetrics)
    (`sm.taylor_statistics()` + `sm.taylor_diagram()`), construir un
-   diagrama con **una estación real como referencia** (Salto) y **los dos
-   modelos reales a comparar** (WRF y ERA5-Land) — 3 puntos en total: 1 de
-   referencia + 2 de modelo. `sm.taylor_statistics()` calcula σ, RMSD
-   centrado y r por ti. Las 5 estaciones
-   restantes del dominio (Ezeiza, Rosario, Resistencia, Iguazú, Carrasco)
-   quedan para la práctica dirigida: cada participante/grupo repite el
-   mismo diagrama con la estación que le toque.
+   diagrama con **una estación como referencia** (Salto) y **dos
+   modelos** (WRF y ERA5-Land): 3 puntos en total.
+   `sm.taylor_statistics()` calcula σ, RMSD centrado y r. Después, cada
+   grupo repite el diagrama con otra de las 5 estaciones del dominio
+   (Ezeiza, Rosario, Resistencia, Iguazú, Carrasco).
 3. **Cálculo de added value (50 min).** Para la misma estación de
-   referencia (Salto), repetir la comparación del Día 8 pero usando
-   ERA5-Land real interpolado en lugar del WRF, calcular las mismas
-   métricas, y construir una tabla comparativa WRF-vs-obs frente a
-   ERA5-Land-vs-obs que responda explícitamente si hay evidencia de valor
-   añadido para esa variable.
+   referencia (Salto), repetir la comparación del Día 8 con ERA5-Land
+   interpolado en lugar del WRF, calcular las mismas métricas y armar una
+   tabla WRF contra observación y ERA5-Land contra observación. ¿Hay valor
+   añadido para esa variable?
 4. **Automatización multi-estación (50 min).** Implementar
    `evaluar_variable()` según el diseño de la teoría, ejecutarla sobre las
-   6 estaciones reales del dominio del WRF, y exportar la tabla resultante
-   a `.csv`.
+   6 estaciones del dominio del WRF y guardar la tabla en un `.csv`.
 5. **Cierre y dudas (20 min).**
 
 **Entregable del módulo:** tus copias de
@@ -239,44 +213,43 @@ todas las estaciones).
 
 ---
 
-## Extensión con datos reales
+## Dos casos más en el entregable
 
-Todo el módulo usa datos reales. El notebook
-`04_entregable_automatizacion.ipynb` agrega dos casos:
+El notebook `04_entregable_automatizacion.ipynb` agrega dos casos:
 
-- **Un caso mal hecho a propósito:** las mismas 6 estaciones reales, pero
+- **Un caso mal hecho a propósito:** las mismas 6 estaciones, pero
   con latitud y longitud intercambiadas al buscar el punto del WRF. Todas
   caen en la misma esquina del dominio, sobre el mar. El código no da error
   y `r` incluso sigue alto en algunas estaciones (el ciclo de día y noche
-  se parece en toda la región), pero el sesgo y el KGE delatan el problema:
-  sin correspondencia real de lugar, la validación no significa nada. Se
-  cierra con una función que avisa cuando el punto encontrado queda lejos.
+  se parece en toda la región), pero el sesgo y el KGE muestran el
+  problema. Si el punto del modelo no corresponde al lugar de la estación,
+  la validación no sirve. Al final hay una función que avisa cuando el
+  punto encontrado queda lejos.
 - **El caso bien hecho:** 6 aeropuertos de Argentina y Uruguay dentro del
   dominio, con observación hora por hora, comparando WRF y ERA5-Land contra
   la misma observación (143 pares). En temperatura, ERA5-Land gana en
-  sesgo, MAE, RMSE y r, pero el WRF gana en KGE (0.75 frente a 0.69): las
-  métricas no siempre coinciden, y por eso se reportan varias. En viento
-  ninguno de los dos acierta bien el patrón horario, y la lluvia por hora
-  es lo más difícil de validar.
+  sesgo, MAE, RMSE y r, pero el WRF gana en KGE (0,75 frente a 0,69). Ese
+  KGE junta las 6 estaciones en una sola serie, y la diferencia de
+  temperatura entre estaciones lo infla; estación por estación, el WRF
+  pierde en casi todas. En viento, ninguno de los dos sigue bien el patrón
+  horario, y la lluvia horaria es lo más difícil de validar.
 
 Cómo se obtuvieron las observaciones y los números completos, en
 [Para profundizar](#para-profundizar).
 
 **Extensión opcional (no evaluada):**
 [`05_extension_opcional_peru_addedvalue.ipynb`](notebooks/05_extension_opcional_peru_addedvalue.ipynb)
-repite la pregunta de *added value* fuera del dominio del WRF, con las 7
-estaciones reales de Perú: ERA5-Land (9 km) vs. ERA5 estándar (31 km),
-ambos reales, contra la misma observación real. Requiere haber completado
-la extensión del Módulo 3, Día 5.
+repite la pregunta de *added value* fuera del dominio del WRF, con 7
+estaciones de Perú: ERA5-Land (9 km) frente a ERA5 (31 km), contra la
+misma observación. Requiere la extensión del Módulo 3, Día 5.
 
 ---
 
 ## Cierre del módulo
 
-**Checkpoint:** el participante debe poder explicar, sin ver el notebook,
-por qué un modelo puede tener r alto y KGE bajo al mismo tiempo, y qué
-comparación adicional (más allá de WRF vs. observación) hace falta para
-hablar de "valor añadido" de forma rigurosa.
+**Pregunta de cierre:** sin mirar el notebook, ¿por qué un modelo puede
+tener r alto y KGE bajo? ¿Qué comparación, además de WRF contra
+observación, hace falta para hablar de valor añadido?
 
 <details>
 <summary><strong>Respuesta esperada</strong> (ábrela después de intentarlo)</summary>
@@ -294,48 +267,41 @@ hablar de "valor añadido" de forma rigurosa.
 
 ## Preguntas frecuentes
 
-**¿Por qué RMSE y MAE casi nunca coinciden con lo que veo "a ojo" en el
-gráfico de la serie temporal?**
-Porque son promedios sobre todo el período, mientras que el ojo tiende a
-fijarse en los picos (donde el desacople suele ser más visible). Un modelo
-puede verse "casi perfecto" en el gráfico durante la mayor parte del
-período y tener un RMSE relativamente alto por un puñado de horas con
-error grande — precisamente porque RMSE penaliza los errores grandes más
-que proporcionalmente (Sección 3 de la teoría).
+**¿Por qué el RMSE y el MAE no coinciden con lo que veo en el gráfico?**
+Porque son promedios de todo el período, y el ojo se fija en los picos. Un
+modelo puede verse casi perfecto casi todo el tiempo y tener un RMSE alto
+por unas pocas horas con mucho error, porque el RMSE pesa más los errores
+grandes (sección 3 de la teoría).
 
 **Mi KGE me dio un valor negativo. ¿Hice algo mal?**
-No necesariamente. A diferencia de r (acotado entre -1 y 1), KGE no tiene
-un límite inferior definido — puede ser arbitrariamente negativo si $\beta$
-o $\alpha$ se alejan mucho de 1, o si r es negativo. Un KGE negativo sí
-indica un ajuste pobre, pero no es un error de cálculo por sí solo; conviene
-revisar los tres componentes ($r$, $\beta$, $\alpha$) por separado para
-entender cuál está arrastrando el valor hacia abajo.
+No necesariamente. A diferencia de r (entre −1 y 1), el KGE no tiene
+mínimo: puede ser muy negativo si $\beta$ o $\alpha$ se alejan mucho de 1,
+o si r es negativo. Un KGE negativo indica un ajuste malo, no un error de
+cálculo. Revisen $r$, $\beta$ y $\alpha$ por separado para ver cuál lo
+baja.
 
-**¿Por qué interpolar el WRF a la estación y no, al revés, "mover" la
-estación al punto de grilla más cercano?**
-Ambas son técnicas válidas y ya se discutieron en el Módulo 2/4
-(`.sel(nearest)` vs. `.interp()`), pero interpolar el modelo a la
-coordenada *exacta* de la estación evita introducir un error adicional de
-posicionamiento: la estación tiene una ubicación fija y conocida, así que
-lo que se ajusta es el dato del modelo (que sí varía suavemente en el
-espacio), no la observación.
+**¿Por qué con el WRF usamos el punto más cercano y con ERA5-Land
+interpolamos?**
+Porque `.interp()` necesita coordenadas 1D, como las de ERA5-Land, y el
+`wrfout` tiene `XLAT`/`XLONG` en 2D. Interpolar el WRF se puede hacer (por
+ejemplo con `scipy` o con `xesmf`), pero con celdas de pocos km la
+diferencia en temperatura es pequeña, y en el curso preferimos el método
+que ya conocen del Módulo 4. ERA5-Land tiene celdas de 9 km, así que ahí
+interpolar sí cambia más el resultado.
 
 **Si mi caso de estudio no tiene estaciones cercanas, ¿puedo saltarme este
 módulo?**
-No — pero si de verdad no hay estaciones disponibles en la zona de interés,
-las alternativas son (a) usar datos satelitales como referencia (con la
-salvedad de que también tienen su propia incertidumbre, discutida en la
-Sección 1), o (b) validar contra el propio reanálisis, dejando explícito
-que en ese caso solo se puede hablar de "consistencia con ERA5", no de
-validación contra una observación independiente.
+No. Si no hay estaciones en la zona, hay dos opciones: (a) usar datos
+satelitales como referencia, con su propia incertidumbre (sección 1), o
+(b) comparar con el reanálisis, diciendo claramente que eso muestra
+consistencia con ERA5 y no una validación contra observaciones
+independientes.
 
 **¿El diagrama de Taylor reemplaza a las tablas de métricas, o se usan
 juntos?**
-Se complementan. El diagrama es excelente para comparar muchas
-estaciones/variables de un vistazo (patrones generales, outliers visuales),
-pero no reemplaza el detalle numérico exacto de una tabla cuando hace falta
-citar un valor preciso (por ejemplo, en un informe o publicación). La
-práctica del Día 9 produce ambos.
+Se usan juntos. El diagrama sirve para comparar muchas estaciones o
+variables y ver cuál se aparta; la tabla, para citar valores exactos en un
+informe. En la práctica del Día 9 se hacen los dos.
 
 ## Para profundizar
 
@@ -370,61 +336,59 @@ entre ambos puntos es exactamente el RMSE centrado.
 
 ### De dónde salen las observaciones y los resultados completos
 
-El notebook `04_entregable_automatizacion.ipynb` usa 6 aeropuertos de Argentina y
-Uruguay que sí están dentro del dominio real del WRF, con coordenadas
-reales extraídas de la cabecera de cada reporte de OGIMET
-(`data/ogimet/coords_area_wrf.json`), **y** el `wrfout` real de **día
-completo** (`data/grid_muestra/wrfout_muestra.nc`, 24 pasos horarios del
-2024-12-13 — a diferencia de `wrfout_real_muestra.nc`, usado en el Módulo
-4, que solo cubre 3 horas pero sí trae las variables 3D/staggered
-necesarias para las lecciones de grilla y rotación de viento). La
-observación ya no viene del resumen climático diario de OGIMET, sino de
-sus **mensajes SYNOP crudos** (binario `getsynop`), decodificados con
-`pymetdecoder` para obtener temperatura, viento y precipitación **hora por
-hora** (`data/obs/*_horario.csv`, generados por las herramientas de
-preparación `data/h1_ogimet.py` → `h2_procesa_horario.py` →
-`h3_junta_mensual.py`, orquestadas por `data/h0_datos_ogimet.sh` para un
-rango de fechas — no son parte del contenido del curso, pero se muestran
-como ejemplo de herramienta ya lista para conseguir datos observados
-reales).
+**Estaciones.** El notebook `04_entregable_automatizacion.ipynb` usa 6
+aeropuertos de Argentina y Uruguay dentro del dominio del WRF. Sus
+coordenadas salen del encabezado de cada reporte de OGIMET
+(`data/ogimet/coords_area_wrf.json`).
 
-Con correspondencia espacial y temporal reales, **el mismo conjunto de
-n=143 pares estación-hora** (6 estaciones × 24 horas, descontando algún
-reporte faltante) se usa para validar WRF y ERA5-Land contra la misma
-observación, dando una comparación de valor añadido completa, honesta y
-con tamaño de muestra sustancial. El resultado real es instructivo
-precisamente porque no está arreglado: en temperatura, ERA5-Land gana en
-sesgo (0.37 vs. 1.28 °C), RMSE (1.78 vs. 2.39 °C) y r (0.81 vs. 0.76), pero
-el WRF gana en KGE (0.75 vs. 0.69); en
-viento, ambos mejoran algo pero ninguno reproduce bien el patrón horario
-(r≈0.18–0.37) — validado por velocidad escalar, no por dirección, que es
-una variable circular y rompería `calcular_r`/`calcular_kge` si se le
-aplicara directo. La precipitación horaria real (`RAINC`/`RAINNC` del WRF
-y `tp` de ERA5-Land, ambos acumulados con reinicio diario confirmado,
-diferenciados con `.diff()` entre pasos consecutivos) solo tiene
-observación de 1 h disponible en Salto (23 pares) — con esa muestra, `r`
-sale bajo o negativo para ambas fuentes, un resultado real y honesto: la
-precipitación puntual y horaria es el campo más difícil de validar, incluso
-para modelos operativos serios. El diagrama de Taylor con `SkillMetrics`
-(referencia + WRF + ERA5-Land) que resume visualmente el resultado de
-temperatura se construye en `03_practica_dia9_taylor_addedvalue.ipynb`
-(con Salto como referencia, n=24) — esta sección se queda con la tabla
-numérica agregada (n=143) como su complemento, más robusta que un solo
-punto de referencia.
+**Modelo.** Usa el `wrfout` de día completo
+(`data/grid_muestra/wrfout_muestra.nc`, 24 salidas horarias del
+13/12/2024). El del Módulo 4 (`wrfout_real_muestra.nc`) cubre solo 3
+horas, pero trae las variables 3D y escalonadas que hacían falta para
+explicar la grilla y la rotación del viento.
+
+**Observaciones.** Salen de los mensajes SYNOP de OGIMET, decodificados
+con `pymetdecoder` para tener temperatura, viento y precipitación hora por
+hora (`data/obs/*_horario.csv`). Los scripts que los generan son
+`data/h1_ogimet.py`, `h2_procesa_horario.py` y `h3_junta_mensual.py`, y
+`data/h0_datos_ogimet.sh` los corre en orden para un rango de fechas. No
+son contenido del curso; están por si quieren conseguir otras
+observaciones.
+
+**Resultados.** Con 143 pares estación-hora (6 estaciones × 24 horas,
+menos algún reporte faltante), WRF y ERA5-Land se comparan con la misma
+observación:
+- **Temperatura:** ERA5-Land tiene menor sesgo (0,37 frente a 1,28 °C),
+  menor RMSE (1,78 frente a 2,39 °C) y mayor r (0,81 frente a 0,76). El
+  WRF tiene mayor KGE agregado (0,75 frente a 0,69), pero ese valor está
+  inflado por juntar estaciones; estación por estación pierde en casi
+  todas.
+- **Viento:** ninguno de los dos sigue bien el patrón horario (r entre
+  0,18 y 0,37). Se valida la velocidad y no la dirección, porque la
+  dirección es circular (359° y 1° están cerca) y `calcular_r` o
+  `calcular_kge` darían cualquier cosa.
+- **Precipitación horaria:** `RAINC`/`RAINNC` del WRF y `tp` de ERA5-Land
+  vienen acumulados (con reinicio diario) y se pasan a lluvia horaria con
+  `.diff()`. Solo Salto reporta lluvia de 1 h (23 pares), y con esa
+  muestra r sale bajo o negativo para los dos. La lluvia puntual y horaria
+  es lo más difícil de validar, también para los modelos operativos.
+
+El diagrama de Taylor de temperatura (Salto, n = 24) está en
+`03_practica_dia9_taylor_addedvalue.ipynb`; esta tabla con las 6
+estaciones lo complementa.
 
 ## Recursos sugeridos
 
 - Taylor, K. E. (2001), *Summarizing multiple aspects of model performance
-  in a single diagram*, J. Geophys. Res. — artículo original del diagrama,
-  lectura de referencia opcional.
+  in a single diagram*, J. Geophys. Res. El artículo original del
+  diagrama.
 - Gupta, H. V. et al. (2009), *Decomposition of the mean squared error and
-  NSE performance criteria* — origen del KGE.
-- Documentación de Pandas — *GroupBy* y *DataFrame* (para la tabla resumen
-  automatizada).
+  NSE performance criteria*. El origen del KGE.
+- Documentación de Pandas: *GroupBy* y *DataFrame*, para la tabla
+  resumen.
 
 ## Siguiente módulo
 
 [Módulo 6 — Pipeline integrado](../modulo_06_pipeline_integrado/README.md):
-las funciones de descarga (Módulo 3), extracción/visualización (Módulo 4) y
-validación (este módulo) se ensamblan en un único flujo reproducible de
-principio a fin.
+juntamos las funciones de descarga (Módulo 3), de gráficos (Módulo 4) y de
+validación (este módulo) en un solo pipeline.

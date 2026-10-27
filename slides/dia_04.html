@@ -182,51 +182,51 @@ jupyter lab
 <span class="c1"># herbie-data y cdsapi ya están instalados desde el Módulo 1</span></pre></div>
 </section>
 <section class="slide slide--quote">
-  <blockquote>Si la descarga se hace a mano, el proceso no es reproducible ni escalable.</blockquote>
+  <blockquote>Una descarga hecha a mano hay que repetirla a mano cada vez, y es difícil saber después qué se pidió.</blockquote>
   
-  <div class="attrib">Hoy convertimos esa tarea manual en funciones reutilizables.</div>
+  <div class="attrib">Hoy la escribimos como funciones de Python.</div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">1</div>
     <h2>Reanálisis vs. pronóstico operativo</h2>
-    <p class="lead">Elegir mal la fuente es un error conceptual, no solo técnico</p>
+    <p class="lead">Qué fuente usar depende de si el evento ya pasó</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Dos lógicas distintas de dato</div>
+  <div class='slide-kicker'>Tres fuentes</div>
   <h2>ERA5 vs. GFS vs. FNL</h2>
   <div class="slide-body top">
-    <table class="cmp"><thead><tr><th></th><th>ERA5 (reanálisis)</th><th>GFS (pronóstico operativo)</th></tr></thead><tbody><tr><td>Qué es</td><td>Un modelo corregido con observaciones reales: la mejor “foto” del pasado</td><td>Un modelo que calcula el futuro, corrido 4 veces al día (00/06/12/18 <strong>UTC</strong>, la hora universal: en Perú son las 19/01/07/13 h)</td></tr><tr><td>Consistencia temporal</td><td>La misma metodología en todo el registro histórico (desde 1940)</td><td>Cambia con los años (resolución, versión del modelo)</td></tr><tr><td>Caso de uso</td><td>Reproducir un evento <strong>ya ocurrido</strong>, estudios de clima</td><td>Simular un evento <strong>próximo</strong>, replicar un pronóstico real</td></tr><tr><td>Quién lo produce</td><td>Copernicus / <strong>CDS</strong> (<em>Climate Data Store</em>, el servicio europeo de acceso a datos climáticos)</td><td><strong>NCEP</strong> (<em>National Centers for Environmental Prediction</em>), parte de <strong>NOAA</strong> (la agencia atmosférica y oceánica de EE.UU.)</td></tr></tbody></table>
+    <table class="cmp"><thead><tr><th></th><th>ERA5 (reanálisis)</th><th>GFS (pronóstico operativo)</th></tr></thead><tbody><tr><td>Qué es</td><td>Un modelo ajustado con observaciones: la mejor estimación de lo que pasó</td><td>Un modelo que calcula el futuro, corrido 4 veces al día (00/06/12/18 <strong>UTC</strong>, la hora universal: en Perú son las 19/01/07/13 h)</td></tr><tr><td>Consistencia temporal</td><td>La misma metodología en todo el registro histórico (desde 1940)</td><td>Cambia con los años (resolución, versión del modelo)</td></tr><tr><td>Caso de uso</td><td>Reproducir un evento <strong>ya ocurrido</strong>, estudios de clima</td><td>Simular un evento <strong>próximo</strong>, replicar un pronóstico real</td></tr><tr><td>Quién lo produce</td><td>Copernicus / <strong>CDS</strong> (<em>Climate Data Store</em>, el servicio europeo de acceso a datos climáticos)</td><td><strong>NCEP</strong> (<em>National Centers for Environmental Prediction</em>), parte de <strong>NOAA</strong> (la agencia atmosférica y oceánica de EE.UU.)</td></tr></tbody></table>
   </div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🌦️</div>
-  <h2>"Simular una lluvia intensa ocurrida en marzo de 2023" — ¿ERA5 o GFS?</h2>
-  <p class="lead">Piensen antes de la respuesta.</p>
-  <div class='hint'>ERA5: el evento ya ocurrió, y el reanálisis incorporó observaciones reales de ese período que un pronóstico previo no pudo usar.</div>
+  <h2>Quiero simular una lluvia intensa de marzo de 2023. ¿ERA5 o GFS?</h2>
+  <p class="lead">Respondan antes de pasar.</p>
+  <div class='hint'>ERA5: el evento ya ocurrió, y el reanálisis usa observaciones de esos días que un pronóstico hecho antes no tenía.</div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Cuidado con la intuición</div>
-  <h2>"Más reciente" no siempre es "mejor"</h2>
+  <div class='slide-kicker'>Cuándo usar cada una</div>
+  <h2>Evento pasado o evento futuro</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Para reproducir con fidelidad un evento <strong>ya ocurrido</strong>, ERA5 es casi siempre la mejor opción — incluso si existe un pronóstico de GFS archivado para esa fecha.</li>
-<li>GFS es la opción correcta cuando el evento <strong>todavía no ha ocurrido</strong> al momento de correr el WRF.</li>
+<li>Para reproducir con fidelidad un evento <strong>ya ocurrido</strong>, ERA5 suele ser la mejor opción, aunque exista un pronóstico de GFS archivado para esa fecha.</li>
+<li>GFS se usa cuando el evento <strong>todavía no ocurrió</strong> al momento de correr el WRF.</li>
 </ul></div>
 </section>
 <section class="slide">
   <div class='slide-kicker'>Una tercera fuente</div>
-  <h2>FNL — Final Operational Global Analysis</h2>
+  <h2>FNL (Final Operational Global Analysis)</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Es la “foto inicial” de cada corrida de GFS, guardada y publicada por <strong>NCAR</strong> (un centro de investigación de EE.UU.).</li>
+<li>Es el análisis inicial de cada corrida de GFS, que guarda y publica <strong>NCAR</strong> (un centro de investigación de EE.UU.).</li>
 <li>Sirve para eventos <strong>recientes</strong>, cuando ERA5 todavía no se publicó (ERA5 sale con unos días de retraso).</li>
-<li>A diferencia de Herbie y <code>cdsapi</code>, <strong>no tiene cliente de Python</strong>: se descarga por HTTPS directo, <strong>sin cuenta ni credenciales</strong>, con un script <code>wget</code>/<code>csh</code> parametrizado por fecha.</li>
+<li>No tiene librería de Python como Herbie o <code>cdsapi</code>. Se descarga por HTTPS, <strong>sin cuenta</strong>, con un script <code>csh</code> que recibe la fecha.</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Sin librería, sin cuenta</div>
+  <div class='slide-kicker'>El script</div>
   <h2>descarga_FNL.csh</h2>
   
   <div class="slide-body top"><pre class="code-block"><span class="c1"># tcsh descarga_FNL.csh AAAAMMDD</span>
@@ -241,23 +241,23 @@ set filelist = ( \
 <span class="kw">end</span></pre><p class="caption">No hace falta entender cada línea: el script arma la dirección web con la fecha y descarga los archivos con <code>wget</code>.</p></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Una cuarta fuente, de otro tipo</div>
+  <div class='slide-kicker'>Otra fuente, de otro tipo</div>
   <h2>SENAMHI: lo que midieron las estaciones</h2>
   
   <div class="slide-body top"><ul class='bullets'>
 <li>ERA5, GFS y FNL son <strong>modelos</strong>: un valor por celda de grilla, para todo el planeta. Son la entrada del WRF.</li>
-<li>SENAMHI son <strong>mediciones</strong> de estaciones, en un punto. No entran al WRF: sirven para comprobar si lo simulado se parece a lo que pasó (Módulos 5 y 6).</li>
+<li>Los datos de SENAMHI son <strong>mediciones</strong> en un punto. No entran al WRF; los usamos para comparar con lo simulado (Módulos 5 y 6).</li>
 <li>Vienen como texto (<code>;</code>), en <strong>hora local de Perú</strong> (UTC−5) y con huecos marcados <code>S/D</code> («sin dato»).</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Automatizar no es sacar a la persona</div>
-  <h2>Una persona en el medio</h2>
+  <div class='slide-kicker'>Descarga de SENAMHI</div>
+  <h2>Un paso lo hace una persona</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>El portal pide pasar una verificación «no soy un robot» en cada descarga: existe para que ningún programa descargue solo.</li>
+<li>El portal pide una verificación «no soy un robot» en cada descarga.</li>
 <li><a href="https://github.com/Japq91/station-hist"><code>station-hist</code></a> abre el navegador, la persona pasa la verificación y el script hace el resto.</li>
-<li>Se automatiza todo lo demás, y se respeta lo que el sitio pide hacer a mano.</li>
+<li>Lo que el sitio pide hacer a mano, lo hacemos a mano.</li>
 </ul><pre class="code-block">python run_operativo.py --search "CAMPO DE MARTE"   # 112171 convencional, 112181 automática
 python run_operativo.py --station 112181 --yeari 2025 --yearf 2025
 # -> downloads_operativo/112181-2025-2025.csv  (año completo; luego se recorta el mes)</pre><p class="caption">Demostración del docente. Paso a paso completo en <code>data/senamhi/README.md</code>; los CSV de 5 estaciones de Lima ya están en esa carpeta.</p></div>
@@ -265,23 +265,23 @@ python run_operativo.py --station 112181 --yeari 2025 --yearf 2025
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">2</div>
-    <h2>Herbie: acceso unificado a modelos operativos</h2>
-    <p class="lead">GFS, ECMWF y otros, desde múltiples fuentes</p>
+    <h2>Herbie</h2>
+    <p class="lead">GFS, ECMWF y otros modelos, desde varios servidores</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>El problema que resuelve</div>
-  <h2>Múltiples repositorios espejo</h2>
+  <div class='slide-kicker'>Para qué sirve</div>
+  <h2>GFS está en varios lugares a la vez</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>GFS se publica en varios “depósitos” a la vez: el portal oficial de NOAA (<strong>NOMADS</strong>) y copias en la nube de Amazon y Google.</li>
+<li>GFS se publica en el portal de NOAA (<strong>NOMADS</strong>) y en copias en la nube de Amazon y Google.</li>
 <li>NOMADS guarda solo los últimos días; las copias en la nube guardan años.</li>
-<li>Cada depósito usa direcciones web distintas, que además cambian con el tiempo.</li>
-<li><strong>Herbie busca por ti:</strong> tú dices modelo, fecha y variable; Herbie encuentra dónde está el archivo.</li>
+<li>Cada uno usa direcciones distintas, y cambian con el tiempo.</li>
+<li>Con Herbie indicas modelo, fecha y variable, y la librería busca dónde está el archivo.</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Flujo lógico</div>
+  <div class='slide-kicker'>En código</div>
   <h2>Herbie en 3 pasos</h2>
   
   <div class="slide-body top"><pre class="code-block"><span class="kw">from</span> herbie <span class="kw">import</span> Herbie
@@ -291,11 +291,11 @@ ruta = h.download()          <span class="c1"># trae el GRIB2 completo</span>
 ds = h.xarray(":TMP:2 m")    <span class="c1"># decodifica con cfgrib -> Dataset</span></pre></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Detalle que confunde</div>
+  <div class='slide-kicker'>El parámetro fxx</div>
   <h2>fxx: cuántas horas hacia adelante</h2>
   <div class="slide-body top"><ul class='bullets'>
 <li>Cada corrida de GFS arranca a una hora fija (00, 06, 12 o 18 UTC) y calcula hacia adelante.</li>
-<li><code>fxx=0</code> es la foto inicial de esa corrida (el <strong>análisis</strong>): sí trae datos.</li>
+<li><code>fxx=0</code> es el estado inicial de esa corrida (el <strong>análisis</strong>), y trae datos como cualquier otra hora.</li>
 <li><code>fxx=6</code> es lo que el modelo calcula 6 horas después de arrancar.</li>
 </ul></div>
 </section>
@@ -303,17 +303,17 @@ ds = h.xarray(":TMP:2 m")    <span class="c1"># decodifica con cfgrib -> Dataset
   <div class="slide-body">
     <div class="num">3</div>
     <h2>cdsapi: pedir y esperar turno</h2>
-    <p class="lead">Por qué una descarga de ERA5 "se queda esperando"</p>
+    <p class="lead">Por qué una descarga de ERA5 puede quedarse esperando</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Como sacar turno en un banco</div>
+  <div class='slide-kicker'>La cola del CDS</div>
   <h2>El CDS no responde al instante</h2>
   
   <div class="slide-body top"><ul class='bullets'>
 <li>El cliente <code>cdsapi</code> envía una solicitud (variable, nivel, fecha, área, formato).</li>
-<li>El servidor la pone <strong>en fila</strong> y la procesa cuando le toca turno — segundos o varios minutos, según la carga del sistema.</li>
-<li>No es un error: es el proceso normal. Por eso automatizarlo en un script tiene sentido — puede esperar sin intervención manual.</li>
+<li>El servidor la pone <strong>en cola</strong> y la procesa cuando le toca: a veces en segundos, a veces en varios minutos.</li>
+<li>Esperar es normal. Un script puede quedarse esperando mientras uno hace otra cosa.</li>
 </ul></div>
 </section>
 <section class="slide">
@@ -337,23 +337,23 @@ client.retrieve(
   <div class="icon">⏳</div>
   <h2>¿Cuánto puede tardar una solicitud a cdsapi?</h2>
   <p class="lead">¿Segundos? ¿Minutos? ¿Depende de algo que ustedes controlen?</p>
-  <div class='hint'>Depende sobre todo de cuánta gente esté pidiendo datos al mismo tiempo (y algo del tamaño del pedido): la misma consulta puede tardar distinto de un día a otro.</div>
+  <div class='hint'>Depende sobre todo de cuánta gente esté pidiendo datos en ese momento, y algo del tamaño del pedido. La misma consulta puede tardar distinto otro día.</div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🧭</div>
   <h2>¿En qué orden va <code>area</code> en la solicitud?</h2>
-  <p class="lead">[norte, oeste, sur, este] — ¿lo recordarán en la práctica de hoy?</p>
-  <div class='hint'>Invertir el orden no siempre lanza un error: puede devolver un área distinta a la esperada, sin avisar.</div>
+  <p class="lead">[norte, oeste, sur, este]. Anótenlo para la práctica.</p>
+  <div class='hint'>Con el orden cambiado no siempre hay error: puede llegar otra área sin aviso.</div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">4</div>
     <h2>Funciones parametrizadas</h2>
-    <p class="lead">Separar "qué se quiere" de "cómo se obtiene"</p>
+    <p class="lead">Lo que cambia entra como argumento; el resto queda dentro de la función</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>El patrón de hoy</div>
+  <div class='slide-kicker'>La función de hoy</div>
   <h2>descargar_era5(...)</h2>
   
   <div class="slide-body top"><pre class="code-block"><span class="kw">def</span> <span class="fn">descargar_era5</span>(fecha_inicio, fecha_fin, area, variables, destino):
@@ -364,29 +364,29 @@ client.retrieve(
 descargar_era5("2026-01-15", "2026-01-16", [10,-82,-20,-66], ["2m_temperature"], "salida.nc")</pre></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Por qué importa</div>
-  <h2>Esto es lo que habilita el Módulo 6</h2>
+  <div class='slide-kicker'>Para el Módulo 6</div>
+  <h2>Funciones que se reutilizan</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Si los parámetros están separados del cuerpo de la función, se puede reutilizar sin modificar — solo cambiando argumentos.</li>
-<li>En el Módulo 6 estas mismas funciones se ensamblan en un pipeline completo, sin reescribirlas.</li>
+<li>Si fecha, área y variables son argumentos, la función sirve para otro caso sin tocar su código.</li>
+<li>En el Módulo 6 juntamos estas mismas funciones en el pipeline.</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Un detalle importante</div>
-  <h2>Siempre se descarga el globo completo</h2>
+  <div class='slide-kicker'>GFS y FNL</div>
+  <h2>Siempre llega el globo completo</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Herbie y FNL no permiten pedir un recorte al servidor — el archivo (o mensaje GRIB2) que llega <strong>siempre cubre todo el planeta</strong>. El WRF también los recibe así: su preprocesador (WPS) recorta al dominio después.</li>
-<li>El recorte a una región pequeña se hace <strong>después</strong>, en Python, con <code>.sel()</code> (Módulo 2) — nunca antes de la descarga para GFS/FNL.</li>
-<li>En la práctica, cada participante recibe una <strong>estación real de Perú al azar</strong> (<code>random.choice()</code>) para recortar — no siempre la misma.</li>
+<li>Con Herbie y con FNL no se puede pedir una región: el archivo GRIB2 <strong>cubre todo el planeta</strong>. El WPS también los recibe así y recorta después.</li>
+<li>El recorte lo hacemos <strong>después</strong>, en Python, con <code>.sel()</code> (Módulo 2).</li>
+<li>En la práctica, cada uno recorta alrededor de la estación de Perú que le asigne el docente.</li>
 </ul></div>
 </section>
 <section class="slide slide--transition">
   <div class="icon">💻</div>
   <h2>Pasamos a la práctica (3 h)</h2>
   <p class="lead">Notebooks: 01_teoria_demos.ipynb y 02_practica_dia4_descargas.ipynb</p>
-  <div class="slide-body top"><ol class="practice-list"><li><strong>Configuración de credenciales</strong> (<code>.cdsapirc</code>) y verificación de imports.</li><li><strong>Primera descarga con Herbie</strong> — GFS global, temperatura + viento a 10 m, recortado a tu estación.</li><li><strong>Primera descarga con cdsapi</strong> — ERA5 <strong>global</strong> (sin <code>area</code> en la solicitud), t2m + msl.</li><li><strong>Primera descarga de FNL</strong> — HTTPS directo, sin cuenta, con <code>descarga_FNL.csh</code>.</li><li><strong>SENAMHI</strong> — demostración de <code>station-hist</code>; comparar lo medido por 5 estaciones de Lima con el GFS de tu descarga.</li><li><strong>Función parametrizada</strong> <code>descargar_era5()</code>, probada con dos casos distintos (con <code>area</code> acotada, para cuando el dominio del WRF ya se conoce).</li></ol></div>
+  <div class="slide-body top"><ol class="practice-list"><li><strong>Configuración de credenciales</strong> (<code>.cdsapirc</code>) y verificación de imports.</li><li><strong>Primera descarga con Herbie</strong>: GFS global, temperatura y viento a 10 m, recortado a tu estación.</li><li><strong>Primera descarga con cdsapi</strong>: ERA5 <strong>global</strong> (sin <code>area</code> en la solicitud), t2m y msl.</li><li><strong>Primera descarga de FNL</strong>: HTTPS directo, sin cuenta, con <code>descarga_FNL.csh</code>.</li><li><strong>SENAMHI</strong>: demostración de <code>station-hist</code>; comparar lo medido por 5 estaciones de Lima con el GFS de tu descarga.</li><li><strong>Función parametrizada</strong> <code>descargar_era5()</code>, probada con dos casos distintos (con <code>area</code> acotada, para cuando el dominio del WRF ya se conoce).</li></ol></div>
 </section>
 <!-- bitacora -->
 <section class="slide">

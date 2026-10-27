@@ -7,22 +7,20 @@
 
 ## Objetivo del módulo
 
-Al finalizar el módulo, el participante podrá escribir programas Python correctos y
-organizados (variables, control de flujo, funciones, scripts) y usar las librerías
-científicas base (NumPy, Pandas, Xarray, Matplotlib) para representar y graficar
-series de datos numéricos. Este módulo no toca todavía archivos NetCDF —eso es el
-Módulo 2—, pero sí introduce la *forma* en que esos datos se van a representar
-(arreglos N-dimensionales etiquetados), usando mediciones **reales** de 5
+Al terminar el módulo, el participante podrá escribir programas cortos en
+Python (variables, condicionales, bucles, funciones, scripts) y usar NumPy,
+Pandas, Xarray y Matplotlib para calcular y graficar series de datos. Los
+NetCDF llegan en el Módulo 2; aquí trabajamos con las mediciones de 5
 estaciones automáticas de SENAMHI en Lima (marzo de 2025, carpeta
-[`data/senamhi/`](../../data/senamhi/README.md)).
+[`data/senamhi/`](../../data/senamhi/README.md)) y armamos a mano los
+mismos arreglos con nombre que después vamos a leer de los archivos.
 
-## Por qué este módulo importa para el WRF
+## Relación con el WRF
 
-Todo lo que el curso hace después —descargar ERA5, leer `wrfout`, calcular un
-RMSE— es, en el fondo, manipular arreglos numéricos con metadatos (tiempo,
-latitud, longitud, nivel vertical). Si el fundamento de Python y de NumPy/Xarray
-no está firme, cada módulo posterior se vuelve una colección de recetas
-copiadas sin entender por qué funcionan. Este módulo construye ese fundamento.
+Descargar ERA5, leer un `wrfout` o calcular un RMSE son operaciones sobre
+arreglos de números con metadatos (tiempo, latitud, longitud, nivel). Si
+estas bases no quedan claras, en los módulos siguientes se termina copiando
+código sin saber qué hace.
 
 ## Prerrequisitos específicos
 
@@ -52,15 +50,15 @@ herramientas separada para cada proyecto: lo que se instala en una caja no
 toca a las demás. En el curso usamos una caja llamada `wrf2026`, distinta
 de `base` (la que trae Miniconda por defecto).
 
-**¿Por qué instalar desde `environment.yml`?** Porque es la lista exacta de
-librerías y versiones del curso: con un solo comando cada participante obtiene
-el mismo entorno con el que se probaron los notebooks, y se evitan los errores
-de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar).
+**¿Por qué instalar desde `environment.yml`?** Es la lista de librerías y
+versiones del curso. Con un comando, cada participante tiene el mismo
+entorno con el que probamos los notebooks. Más detalle en
+[Para profundizar](#para-profundizar).
 
 **2. Tipos de datos y el modelo de variables en Python (~25 min)**
 - Tipos primitivos: `int`, `float`, `str`, `bool`. Un `float` no es exacto
   (`0.1 + 0.2 != 0.3`), por eso los resultados numéricos se comparan con una
-  tolerancia (`np.isclose`), nunca con `==`.
+  tolerancia (`np.isclose`) y no con `==`.
 - Una variable es una **etiqueta pegada a un dato**, no una caja que lo
   guarda. Si se hace `b = a` con una lista, `a` y `b` son dos etiquetas
   sobre la **misma** lista: cambiar `b` también cambia `a`. Es un error
@@ -69,23 +67,20 @@ de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar
 
 **3. Estructuras de datos: listas y diccionarios (~30 min)**
 - Listas: colecciones ordenadas que se pueden modificar. Se cubre cómo
-  tomar un elemento (`datos[2]`) o un tramo (`datos[2:5]`), y por qué el indexado por posición es frágil para datos
-  con significado físico (p. ej. "la temperatura del día 3" es más claro
-  como `temperaturas["2026-01-03"]` que como `temperaturas[2]`).
-- Diccionarios: estructura clave–valor, la forma natural de, por ejemplo,
-  mapear nombres de estaciones meteorológicas a sus coordenadas
-  (`coords["Lima"]`).
-- Anidamiento: listas de diccionarios como forma simple de representar
-  varios registros (ej. una lista de estaciones, cada una con su propio
-  diccionario de metadatos).
+  tomar un elemento (`datos[2]`) o un tramo (`datos[2:5]`). Por posición
+  es fácil equivocarse: `temperaturas["2026-01-03"]` dice más que
+  `temperaturas[2]`.
+- Diccionarios: pares clave–valor, por ejemplo el nombre de cada estación
+  con sus coordenadas (`coords["Ñaña"]`).
+- Anidamiento: una lista de diccionarios para varios registros, por
+  ejemplo una lista de estaciones, cada una con sus datos.
 
 **4. Flujos de control e iteración (~20 min)**
-- Condicionales (`if`/`elif`/`else`) como forma de codificar reglas físicas
-  simples (p. ej. clasificar precipitación en categorías según umbrales
-  en mm).
-- Bucles `for` y `while`, y la noción de iterar sobre una colección en vez
-  de controlar un índice manualmente (`for temp in temperaturas` en vez de
-  `for i in range(len(temperaturas))` cuando no se necesita el índice).
+- Condicionales (`if`/`elif`/`else`) para escribir reglas simples, como
+  clasificar la lluvia según umbrales en mm.
+- Bucles `for` y `while`. Cuando no hace falta la posición, se recorre la
+  colección directamente (`for temp in temperaturas`) en vez de usar un
+  índice (`for i in range(len(temperaturas))`).
 
 **5. Funciones y organización de scripts (~20 min)**
 - Una función es una receta con nombre: recibe ingredientes (entradas),
@@ -95,8 +90,8 @@ de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar
 - Lo que se crea dentro de una función se queda dentro: una variable
   definida ahí no existe afuera. Así una función no altera por accidente el
   resto del programa.
-- Organización de un script `.py` vs. un notebook `.ipynb`: cuándo conviene
-  cada uno (exploración interactiva vs. código reproducible/automatizable).
+- Script `.py` o notebook `.ipynb`: el notebook para explorar, el script
+  para lo que se va a repetir.
 
 ### Práctica (3 h)
 
@@ -116,8 +111,8 @@ de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar
    python -c "import numpy, pandas, xarray, matplotlib; print('OK')"
    jupyter lab            # debe abrir usando el intérprete de wrf2026, no el de base
    ```
-   **Al empezar cada clase**, trae el material nuevo del curso desde la
-   carpeta del repositorio:
+   **Al empezar cada clase**, trae el material nuevo desde la carpeta del
+   repositorio:
    ```bash
    git pull
    ```
@@ -128,15 +123,12 @@ de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar
    `antes_del_curso.md`, sección 5). Si el `environment.yml` cambió, el
    entorno se actualiza con `conda env update -f environment.yml --prune`,
    sin recrearlo.
-2. **Ejercicio guiado — tipos y estructuras (45 min).** A partir de una
-   lista de temperaturas horarias reales (Von Humboldt, La Molina, 14 de
-   marzo de 2025), que primero se lee del archivo de SENAMHI con `open()` y
-   `split(";")`, el participante calcula manualmente (sin NumPy todavía) el promedio, el
-   máximo, el mínimo y cuántas horas superaron un umbral, usando solo
-   listas, bucles y condicionales. El objetivo es sentir el costo de hacer
-   esto sin librerías vectorizadas, para apreciar por qué NumPy existe
-   (se retoma el día siguiente).
-3. **Ejercicio guiado — diccionarios anidados (45 min).** Se construye un
+2. **Tipos y estructuras (45 min).** Se leen las temperaturas horarias de
+   Von Humboldt (La Molina, 14 de marzo de 2025) del archivo de SENAMHI con
+   `open()` y `split(";")`. Con listas, bucles y condicionales (todavía sin
+   NumPy) se calcula el promedio, el máximo, el mínimo y cuántas horas
+   superaron un umbral. Mañana hacemos lo mismo con NumPy y comparamos.
+3. **Diccionarios anidados (45 min).** Se construye un
    diccionario con las 5 estaciones de SENAMHI, cada una con nombre,
    coordenadas (lat/lon), altura y sus 24 temperaturas del mismo día.
    El participante escribe funciones para: (a) encontrar la estación con
@@ -144,14 +136,12 @@ de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar
    rango de altura, (c) imprimir un resumen formateado por estación.
    Después recorre el mes completo buscando los huecos: horas con `S/D`
    («sin dato») y horas que faltan en el archivo.
-4. **Ejercicio autónomo — mini-script de clasificación (45 min).**
-   Escribir un script `.py` (no notebook) que sume la lluvia de cada hora
-   de una estación (por defecto Ñaña) y clasifique cada día como "sin lluvia",
-   "llovizna", "moderada" o "fuerte" según umbrales dados, usando una
-   función `clasificar_precipitacion(valor)` reutilizable, que además
-   devuelve "sin dato" cuando no hay medición. Se ejecuta desde la
-   terminal, reforzando la diferencia script/notebook vista en teoría. Spoiler
-   real: en marzo casi no llueve en Lima.
+4. **Un script de clasificación (45 min).** Un script `.py` que suma la
+   lluvia horaria de una estación (Ñaña, si no se indica otra) y clasifica
+   cada día como "sin lluvia", "llovizna", "moderada" o "fuerte" con la
+   función `clasificar_precipitacion(valor)`, que devuelve "sin dato"
+   cuando no hay medición. Se ejecuta desde la terminal. Ya lo verán: en
+   marzo casi no llueve en Lima.
 5. **Cierre y dudas (15 min).**
 
 En el notebook, cada ejercicio trae un **📘 ejemplo resuelto** (otra
@@ -169,30 +159,28 @@ script `temperatura_maxima_mio.py`.
 
 > **Recordatorio antes de empezar:** si se abrió una terminal nueva desde
 > el Día 1 (por ejemplo, al reiniciar la computadora), hay que activar de
-> nuevo el entorno antes de abrir Jupyter — la activación **no** queda
-> guardada entre sesiones de terminal distintas:
+> nuevo el entorno antes de abrir Jupyter. La activación **no** queda
+> guardada de una terminal a otra:
 > ```bash
 > conda activate wrf2026
 > jupyter lab
 > ```
-> Este recordatorio se repite al inicio de cada módulo del curso, porque es
-> el error de configuración más común entre quienes recién empiezan a usar
-> entornos Conda.
+> Lo vamos a repetir al inicio de cada módulo: es el olvido más frecuente
+> con Conda.
 
 ### Teoría (2 h)
 
 **1. Por qué vectorizar: NumPy frente al Python puro (~30 min)**
-Se retoma el ejercicio del día 1 (calcular estadísticas sobre una lista con
-bucles) y se muestra la misma operación con un arreglo NumPy: más corta de
-escribir y órdenes de magnitud más rápida sobre grillas de cientos de miles
-de puntos, como una grilla del WRF (el porqué, en
+Retomamos el ejercicio del Día 1 (estadísticas con bucles) y lo hacemos
+con un arreglo NumPy. El código es más corto y, con cientos de miles de
+puntos como en una grilla del WRF, mucho más rápido (el porqué, en
 [Para profundizar](#para-profundizar)).
 - Un arreglo tiene una **forma** (`shape`): cuántos datos hay en cada
   dirección. Una grilla de 24 horas × 30 latitudes × 40 longitudes tiene
   forma `(24, 30, 40)`.
 - Tomar partes de un arreglo: `arr[:, 0]` (todas las filas, primera
   columna), `arr[1:3, :]` (filas 1 y 2, todas las columnas).
-- **Broadcasting**: NumPy "estira" el arreglo más chico para que calce con
+- **Broadcasting**: NumPy repite el arreglo más chico para que calce con
   el más grande, sin bucles. Ejemplo: restar a cada nivel de una grilla
   `(niveles, lat, lon)` una corrección distinta por nivel. El perfil de
   corrección tiene 5 valores; para que NumPy sepa que van por nivel, se le
@@ -204,68 +192,53 @@ de puntos, como una grilla del WRF (el porqué, en
   `mean(axis=(1, 2))` promedia el espacio y deja una serie de tiempo.
 
 **2. Introducción a Xarray: arreglos con nombre (~35 min)**
-Se motiva el problema que Xarray resuelve: un arreglo NumPy de forma
-`(24, 30, 40)` no dice, por sí mismo, si esos ejes son (tiempo, lat, lon)
-o (nivel, lat, lon) o cualquier otra combinación — hay que recordarlo
-mentalmente o llevar la cuenta en comentarios, lo cual es frágil y es una
-fuente común de errores silenciosos al analizar datos de modelos.
+Un arreglo NumPy de forma `(24, 30, 40)` no dice si sus ejes son
+(tiempo, lat, lon), (nivel, lat, lon) u otra cosa. Hay que recordarlo o
+anotarlo en comentarios, y si nos equivocamos de eje el código corre igual
+con un resultado equivocado. Xarray le pone nombre a cada eje.
 - `DataArray`: un arreglo NumPy + nombres de dimensión + coordenadas +
   atributos (metadatos como unidades). Se construye uno desde cero con
-  los datos de SENAMHI (`temperatura` indexada por `tiempo` y `estacion`) para
-  fijar el concepto antes de ver un NetCDF real en el Módulo 2.
-- `Dataset`: una colección de `DataArray` que comparten dimensiones,
-  análogo a una tabla con varias columnas pero en N dimensiones.
+  los datos de SENAMHI (`temperatura` indexada por `tiempo` y `estacion`),
+  antes de abrir un NetCDF en el Módulo 2.
+- `Dataset`: varios `DataArray` que comparten dimensiones, como una tabla
+  con varias columnas pero en N dimensiones.
 - Indexado por **nombre** (`.sel(tiempo="2026-01-15")`) frente a indexado
-  por **posición** (`.isel(tiempo=0)`) — esta distinción es la que se va a
-  usar constantemente desde el Módulo 2 en adelante.
-- Por qué esto importa para WRF: adelantar (sin profundizar todavía, eso es
-  Módulo 2) que un archivo `wrfout` es exactamente esta clase de estructura
-  con dimensiones `Time`, `bottom_top`, `south_north`, `west_east`.
+  por **posición** (`.isel(tiempo=0)`). Lo usaremos en todos los módulos.
+- Un `wrfout` tiene esta misma estructura, con dimensiones `Time`,
+  `bottom_top`, `south_north` y `west_east` (lo vemos en el Módulo 4).
 
 **3. Pandas para series temporales (~25 min)**
-- `Series` y `DataFrame` como estructuras para datos tabulares e indexados
-  en el tiempo — el formato natural de, por ejemplo, un registro horario de
-  una estación meteorológica.
-- `DatetimeIndex`: por qué usar fechas reales como índice (en vez de un
-  entero) habilita operaciones como seleccionar "todo enero" o "cada
-  medianoche" de forma declarativa.
-- `resample`: agregación temporal (de horario a diario, de diario a
-  mensual) — se explica como una generalización de `groupby` sobre
-  intervalos de tiempo, y se anticipa que se volverá a usar al procesar
-  datos de estaciones en el Módulo 5.
+- `Series` y `DataFrame`: tablas indexadas por tiempo, como el registro
+  horario de una estación.
+- `DatetimeIndex`: con las fechas como índice se puede pedir «todo enero» o
+  «cada medianoche» sin comparar fechas a mano.
+- `resample`: pasar de horario a diario o de diario a mensual. Es un
+  `groupby` por intervalos de tiempo; lo volvemos a usar con las
+  estaciones del Módulo 5.
 
 **4. Matplotlib: el modelo Figure/Axes (~20 min)**
-- Diferencia entre una `Figure` (el lienzo) y un `Axes` (el sistema de
-  ejes donde se dibuja) — entender este modelo evita la confusión típica
-  de principiantes con `plt.plot` "mágico" y permite construir figuras con
-  varios paneles más adelante (Módulo 4).
-- Gráfico de línea simple y gráfico de dispersión, con etiquetas de ejes y
-  título — el mínimo indispensable para que una figura sea interpretable
-  científicamente.
+- `Figure` es el lienzo y `Axes` es cada sistema de ejes donde se dibuja.
+  Con esa distinción clara, armar figuras de varios paneles (Módulo 4) es
+  directo.
+- Gráfico de línea y de dispersión, con etiquetas en los ejes y título.
 - **Múltiples paneles con `plt.subplots(nrows, ncols)`:** `fig, axes =
   plt.subplots(1, 2, figsize=(...))` devuelve una `Figure` y un arreglo de
-  `Axes` — cada panel se dibuja llamando al método correspondiente sobre
-  `axes[i]` en vez de sobre un único `ax`. Se presenta acá, brevemente,
-  porque el ejercicio de cierre de este mismo día (integración de las 4
-  librerías) ya arma una figura de 2 paneles, y porque es exactamente el
-  patrón que se reutiliza en el Módulo 4 para mapa + serie temporal lado a
-  lado.
+  `Axes`; cada panel se dibuja sobre `axes[i]`. Lo necesitamos hoy para
+  la figura de 2 paneles del entregable, y otra vez en el Módulo 4 para
+  poner un mapa y una serie lado a lado.
 
 **5. Cierre y repaso antes de la práctica (~10 min)**
-Repaso rápido de cómo encajan las cuatro librerías del día — NumPy para el
-cálculo vectorizado de base, Xarray para darle nombre a los ejes de ese
-cálculo, Pandas para el eje temporal, Matplotlib para comunicarlo — y
-preguntas abiertas antes de pasar a la práctica. Se adelanta que el Módulo
-2 retoma `Dataset` de Xarray, pero ahora leído desde un archivo NetCDF/GRIB
-real, no construido a mano.
+Repaso de las cuatro librerías: NumPy calcula, Xarray le pone nombre a los
+ejes, Pandas maneja el tiempo y Matplotlib dibuja. Preguntas antes de la
+práctica. Mañana, en el Módulo 2, el `Dataset` ya no lo armamos a mano: lo
+leemos de un NetCDF o un GRIB.
 
 ### Práctica (3 h)
 
 1. **De bucles a NumPy (30 min).** Reescribir el ejercicio de estadísticas
    del día 1 (promedio, máximo, mínimo, conteo sobre umbral) usando
-   arreglos NumPy en lugar de bucles, y comparar la longitud y claridad del
-   código resultante.
-2. **Broadcasting con sentido físico (30 min).** Dado un arreglo inventado
+   arreglos NumPy en lugar de bucles, y comparar los dos códigos.
+2. **Broadcasting (30 min).** Dado un arreglo de práctica
    de temperatura (todavía no leemos un WRF) con forma `(niveles=5, lat=10, lon=10)` y un perfil de
    corrección vertical de forma `(5,)`, aplicar la corrección a toda la
    grilla usando broadcasting, y verificar el resultado comparando un punto
@@ -282,17 +255,15 @@ real, no construido a mano.
    leyenda.
    **(b) Refuerzo:** repetir el ejercicio partiendo esta vez del CSV de
    SENAMHI leído «crudo»: la fecha llega como **texto** repartido en 4
-   columnas (`Año`, `Mes`, `Día`, `Hora`) y los faltantes como `S/D` —
-   juntarlas y convertirlas explícitamente con `pd.to_datetime()`, pasar
+   columnas (`Año`, `Mes`, `Día`, `Hora`) y los faltantes como `S/D`. Hay
+   que juntarlas y convertirlas con `pd.to_datetime()`, pasar
    `S/D` a `NaN` con `pd.to_numeric(..., errors="coerce")` y fijarla como índice con `.set_index()` antes de
    poder usar `resample()`, esta vez con una frecuencia distinta
-   (`resample("7D")`, min/max semanal). Este paso existe porque en (a)
-   la función `leer_senamhi()` hizo ese trabajo sin que lo viéramos.
-5. **Cierre e integración (30 min):** cada participante construye un
-   notebook único que combina las cuatro librerías (NumPy para el cálculo
-   base, Xarray para estructurar los datos con nombre, Pandas para el
-   manejo temporal, Matplotlib para la figura final), como ensayo general
-   del tipo de flujo que se repetirá en cada módulo siguiente.
+   (`resample("7D")`, mínimo y máximo semanal). En (a) ese trabajo lo hizo
+   `leer_senamhi()` sin que lo viéramos.
+5. **Entregable (30 min):** un notebook que usa las cuatro librerías
+   juntas, con el mismo orden de pasos que repetiremos en los módulos
+   siguientes.
 
 **Entregable del día:** tu copia `03_practica_dia2_mio.ipynb` con las
 comprobaciones en ✅, y tu copia de
@@ -304,18 +275,17 @@ relativa) y el archivo `entregable_modulo1_mio.nc`.
 
 ## Cierre del módulo
 
-**Checkpoint (no evaluado formalmente, sí revisado en clase):** cada
-participante debe poder explicar, en sus propias palabras, la diferencia
-entre indexar por posición y por nombre en Xarray, y por qué esa distinción
-va a ser importante al trabajar con archivos NetCDF reales. Esta pregunta se
-retoma como gancho de apertura del Módulo 2.
+**Pregunta de cierre (sin nota, la revisamos en clase):** expliquen con sus
+palabras la diferencia entre seleccionar por posición y por nombre en
+Xarray, y por qué importa cuando se trabaja con archivos NetCDF. El Módulo 2
+empieza con esta pregunta.
 
 <details>
 <summary><strong>Respuesta esperada</strong> (ábrela después de intentarlo)</summary>
 
 `.isel(tiempo=0)` elige por **posición** (el primer elemento, sea cual sea su
 fecha); `.sel(tiempo="2026-01-15")` elige por **valor de la coordenada**. Con
-archivos reales la posición no es confiable: dos archivos pueden empezar en
+archivos distintos la posición no es confiable: pueden empezar en
 fechas distintas, tener otro orden de latitudes (norte→sur o sur→norte) o
 un recorte diferente, y `isel` devolvería otro dato sin dar ningún error.
 `sel` busca lo que se pidió por su nombre, así que el código sigue siendo
@@ -341,12 +311,12 @@ código. Un script es mejor para lógica que se va a reutilizar o ejecutar
 repetidamente sin supervisión (por ejemplo, desde otro programa, o
 programado para correr cada noche). En este curso, los notebooks se usan
 para practicar y explorar, mientras que la lógica que se vuelve
-"definitiva" migra a scripts `.py` a partir del Módulo 3 — anticipando el
-patrón que se formaliza en el Módulo 6.
+ya probada pasa a scripts `.py` desde el Módulo 3, y en el Módulo 6 todo
+termina en un pipeline.
 
 **¿Necesito memorizar la fórmula de broadcasting o las reglas exactas de
 NumPy?**
-No. Lo que sí conviene interiorizar es la intuición: una operación entre
+No. Basta con la idea: una operación entre
 arreglos de formas distintas solo funciona si, comparando de derecha a
 izquierda, cada par de dimensiones es igual o una de ellas vale 1. Frente a
 un error de broadcasting, imprimir `.shape` de cada arreglo involucrado
@@ -361,11 +331,10 @@ o dos dimensiones, Xarray cuando hay tres o más dimensiones con nombre
 (como en casi todos los datos atmosféricos del resto del curso).
 
 **Si no tengo experiencia previa programando, ¿este ritmo (2 días) alcanza?**
-El Día 1 está diseñado para no asumir experiencia previa, y el Día 2
-avanza más rápido apoyándose en lo aprendido el Día 1. Aun así, es normal
-sentir que dos días es poco tiempo para todo lo cubierto — no se espera
-memorizar sintaxis, sino reconocer los patrones al verlos de nuevo en los
-módulos siguientes, donde se reutilizan constantemente sobre datos reales.
+El Día 1 no supone experiencia previa; el Día 2 va más rápido. Es normal
+sentir que dos días es poco. No hace falta memorizar la sintaxis: los mismos
+patrones vuelven en todos los módulos siguientes, y se van fijando con el
+uso.
 
 ## Para profundizar
 
@@ -373,28 +342,18 @@ Material opcional: no hace falta para la práctica ni para el proyecto final.
 
 ### Por qué un `environment.yml` versionado
 
-`environment.yml` es una lista exacta y versionada de qué necesita el
-proyecto (nombre del entorno, canal de paquetes, cada librería y —cuando
-hace falta— su versión). Todo el material del curso (este repositorio
-`wrf2026unalm`) vive en GitHub, y ese archivo vive junto al código, no en la
-cabeza del instructor ni en una guía aparte. Esto tiene tres consecuencias
-prácticas, no solo de comodidad:
-- **Reproducibilidad:** el entorno que arma un participante el día 1 es
-  *exactamente* el mismo (mismas versiones) que el que usó el instructor
-  para preparar y probar cada notebook del curso. Instalar "a mano" paquete
-  por paquete casi garantiza pequeñas diferencias de versión entre
-  computadoras, que después se manifiestan como errores difíciles de
-  reproducir ("a mí sí me funciona").
-- **Una sola fuente de verdad:** si el curso agrega una librería nueva
-  (como pasó aquí con varias herramientas específicas de meteorología), el
-  cambio se hace una vez en `environment.yml` dentro del repositorio, y
-  cada participante simplemente vuelve a sincronizar su entorno — no hay
-  que re-explicar manualmente qué instalar.
-- **Onboarding de un solo comando:** en vez de una lista de instrucciones
-  para copiar y pegar librería por librería (con riesgo de saltarse una o
-  instalar la versión equivocada), la instalación completa se reduce a
-  clonar el repositorio y ejecutar `conda env create`, como se hace en la
-  práctica de este mismo día.
+`environment.yml` lista lo que necesita el proyecto: el nombre del
+entorno, el canal de paquetes y cada librería con su versión. Está en el
+repositorio junto al código. Eso sirve para tres cosas:
+- **Tener lo mismo que el docente:** el entorno de cada participante tiene
+  las mismas versiones con las que probamos los notebooks. Instalando
+  paquete por paquete, cada computadora termina con versiones algo
+  distintas, y aparecen errores que solo le pasan a una persona.
+- **Actualizar en un solo lugar:** si el curso necesita una librería
+  nueva, se agrega a `environment.yml` y cada uno actualiza con
+  `conda env update -f environment.yml --prune`.
+- **Instalar con un comando:** clonar el repositorio y ejecutar
+  `conda env create`, como en `antes_del_curso.md`.
 
 ### Por qué `0.1 + 0.2 != 0.3`
 
@@ -416,19 +375,18 @@ estaciones.
 Un bucle `for` en Python puro revisa el tipo de cada elemento en cada
 iteración, porque Python es de tipado dinámico. Un arreglo NumPy guarda
 datos de un solo tipo en un bloque contiguo de memoria y aplica la
-operación en código C compilado. La diferencia es de uno a dos órdenes de
-magnitud sobre grillas como las del WRF.
+operación en código C compilado. Con grillas como las del WRF, suele ser
+entre 10 y 100 veces más rápido.
 
 ## Recursos sugeridos
 
-- Documentación oficial de NumPy — *Quickstart* y *Broadcasting*.
-- Documentación oficial de Xarray — *Data Structures*.
-- Wes McKinney, *Python for Data Analysis* (capítulos de Pandas/series
-  temporales) — lectura opcional de referencia, no obligatoria.
+- Documentación de NumPy: *Quickstart* y *Broadcasting*.
+- Documentación de Xarray: *Data Structures*.
+- Wes McKinney, *Python for Data Analysis*, capítulos de Pandas y series
+  temporales (opcional).
 
 ## Siguiente módulo
 
 [Módulo 2 — Formatos de datos atmosféricos](../modulo_02_formatos_datos_atmosfericos/README.md):
-se retoma la estructura `Dataset` vista aquí, pero ahora sobre archivos
-NetCDF y GRIB reales, con sus convenciones (CF) y metadatos propios de
-ciencias atmosféricas.
+el mismo `Dataset`, ahora leído de archivos NetCDF y GRIB, con sus
+convenciones (CF) y metadatos.

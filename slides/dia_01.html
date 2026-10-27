@@ -176,9 +176,9 @@ table.cmp tr:nth-child(even) td { background: var(--gris-100); }
   <h2>¿Qué es el WRF?</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><strong>WRF</strong> = <em>Weather Research and Forecasting model</em> — un modelo numérico de predicción atmosférica de mesoescala, escrito en Fortran, usado en investigación y en pronóstico operativo en todo el mundo.</li>
-<li>El WRF necesita <strong>datos de entrada</strong> (condiciones iniciales y de frontera) y produce <strong>datos de salida</strong> (la simulación en sí).</li>
-<li>Este curso no enseña a correr el WRF — enseña a automatizar, con Python, todo lo que rodea esa ejecución: conseguir sus insumos, leer sus resultados, y comprobar que esos resultados sean creíbles.</li>
+<li><strong>WRF</strong> = <em>Weather Research and Forecasting model</em>, un modelo numérico de mesoescala escrito en Fortran. Se usa en investigación y en pronóstico operativo.</li>
+<li>El WRF necesita <strong>datos de entrada</strong> (condiciones iniciales y de frontera) y produce <strong>datos de salida</strong> (la simulación).</li>
+<li>En este curso no vamos a correr el WRF. Vamos a usar Python para lo que pasa antes y después: conseguir los datos de entrada, leer las salidas y compararlas con observaciones.</li>
 </ul></div>
 </section>
 <section class="slide">
@@ -186,24 +186,24 @@ table.cmp tr:nth-child(even) td { background: var(--gris-100); }
   <h2>El curso en 6 módulos</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><strong>Módulo 1</strong> (hoy y mañana) — Python básico: la caja de herramientas.</li>
-<li><strong>Módulo 2</strong> — Formatos de datos atmosféricos: NetCDF y GRIB.</li>
-<li><strong>Módulo 3</strong> — Descarga automatizada de datos de entrada (ERA5, GFS).</li>
-<li><strong>Módulo 4</strong> — Lectura y visualización de salidas del WRF (<code>wrfout</code>, el nombre típico de los archivos que produce el modelo).</li>
-<li><strong>Módulo 5</strong> — Validación de resultados contra observaciones.</li>
-<li><strong>Módulo 6</strong> — Todo integrado en un pipeline reproducible (proyecto final).</li>
+<li><strong>Módulo 1</strong> (hoy y mañana): Python básico.</li>
+<li><strong>Módulo 2</strong>: formatos de datos atmosféricos, NetCDF y GRIB.</li>
+<li><strong>Módulo 3</strong>: descarga de datos de entrada (ERA5, GFS, FNL).</li>
+<li><strong>Módulo 4</strong>: lectura y gráficos de las salidas del WRF (los archivos <code>wrfout</code>).</li>
+<li><strong>Módulo 5</strong>: validación contra observaciones.</li>
+<li><strong>Módulo 6</strong>: todo junto en un pipeline (proyecto final).</li>
 </ul></div>
 </section>
 <section class="slide slide--quote">
-  <blockquote>Todo lo que hacemos después —descargar ERA5, leer wrfout, calcular un RMSE— es, en el fondo, manipular arreglos numéricos con metadatos.</blockquote>
-  <p class='context'>"Metadatos" aquí quiere decir: junto a cada número, información sobre qué representa (una fecha, una coordenada, una unidad). Sin eso, un arreglo de números es solo eso — números sin significado.</p>
-  <div class="attrib">Por eso empezamos por los fundamentos de Python, no por WRF.</div>
+  <blockquote>Descargar ERA5, leer un wrfout o calcular un RMSE son, al final, operaciones sobre arreglos de números con metadatos.</blockquote>
+  <p class='context'>Metadatos: lo que acompaña a cada número para saber qué representa (una fecha, una coordenada, una unidad).</p>
+  <div class="attrib">Por eso los dos primeros días son de Python.</div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">1</div>
     <h2>Entornos virtuales</h2>
-    <p class="lead">¿Qué son y por qué instalamos desde un archivo versionado?</p>
+    <p class="lead">Qué son y por qué el curso instala todo desde un archivo</p>
   </div>
 </section>
 <section class="slide">
@@ -211,18 +211,18 @@ table.cmp tr:nth-child(even) td { background: var(--gris-100); }
   <h2>Python es un lenguaje interpretado</h2>
   <p class='lead'>A diferencia de Fortran (el lenguaje del WRF), que se compila antes de ejecutar.</p>
   <div class="slide-body top"><ul class='bullets'>
-<li>Cada línea se traduce y ejecuta <strong>en el momento</strong>, no de una sola vez al inicio.</li>
-<li>Ventaja: iterar rápido, probar ideas en segundos.</li>
-<li>Consecuencia práctica: dos proyectos pueden necesitar <strong>versiones distintas</strong> de la misma librería (<code>xarray 2023.1</code> vs. <code>xarray 2024.6</code>), y no siempre son compatibles entre sí.</li>
+<li>Cada línea se traduce y se ejecuta <strong>en el momento</strong>; no hay un paso previo de compilación.</li>
+<li>Se pueden probar cosas en segundos.</li>
+<li>Como no se compila nada, cada proyecto usa las librerías instaladas en ese momento. Dos proyectos pueden necesitar <strong>versiones distintas</strong> de la misma librería (<code>xarray 2023.1</code> vs. <code>xarray 2024.6</code>), y no siempre son compatibles entre sí.</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>El problema, con un ejemplo concreto</div>
+  <div class='slide-kicker'>Un ejemplo</div>
   <h2>Sin entornos separados...</h2>
   <div class="two-col"><div class="col-box acc-rojo"><h3>Proyecto A (enero)</h3><ul class='bullets'>
 <li>Necesita <code>xarray 2023.1</code></li>
-<li>Se instala directamente en el sistema ("global"), sin aislar nada</li>
-<li>Funciona bien... por ahora</li>
+<li>Se instala en el sistema, para todos los proyectos</li>
+<li>Funciona</li>
 </ul></div><div class="col-box acc-rojo"><h3>Proyecto B (marzo)</h3><ul class='bullets'>
 <li>Necesita <code>xarray 2024.6</code>, que cambió cómo lee ciertos archivos</li>
 <li><code>pip install --upgrade xarray</code> reemplaza la versión anterior</li>
@@ -230,13 +230,13 @@ table.cmp tr:nth-child(even) td { background: var(--gris-100); }
 </ul></div></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>La solución</div>
+  <div class='slide-kicker'>Lo que hacemos</div>
   <h2>Un entorno virtual por proyecto</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Miniconda crea una carpeta <strong>aislada</strong> con su propia copia de Python y de cada librería.</li>
+<li>Miniconda crea una carpeta <strong>aparte</strong> con su propia copia de Python y de cada librería.</li>
 <li>El entorno del curso se llama <strong><code>wrf2026</code></strong>.</li>
-<li><code>base</code> (el entorno por defecto) se deja intacto — WRF y su cadena de Python conviene mantenerlos separados de este entorno.</li>
+<li><code>base</code>, el entorno por defecto, no se toca. Si ya usan Python para el WRF, ese entorno sigue como está.</li>
 </ul></div>
 </section>
 <section class="slide slide--check">
@@ -275,20 +275,20 @@ python -c "import numpy, pandas, xarray, matplotlib; print('OK')"
 jupyter lab</pre></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Importante</div>
+  <div class='slide-kicker'>Cada vez que abren una terminal</div>
   <h2>La activación no es permanente</h2>
   
   <div class="slide-body top"><ul class='bullets'>
 <li><code>conda activate wrf2026</code> solo dura mientras esa <strong>terminal</strong> siga abierta.</li>
 <li>Cada vez que se abre una terminal nueva (mañana, la próxima semana), hay que activarlo de nuevo <strong>antes</strong> de abrir Jupyter.</li>
-<li>Señal rápida de que está bien: <code>(wrf2026)</code> al inicio de la línea de comandos.</li>
+<li>Si está activo, la línea de comandos empieza con <code>(wrf2026)</code>.</li>
 </ul></div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">2</div>
     <h2>Tipos de datos y variables</h2>
-    <p class="lead">El modelo mental que evita errores silenciosos más adelante</p>
+    <p class="lead">Lo que conviene tener claro antes de escribir código</p>
   </div>
 </section>
 <section class="slide">
@@ -296,16 +296,16 @@ jupyter lab</pre></div>
   <h2>int, float, str, bool</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><code>int</code> — números enteros: <code>24</code>, <code>-3</code></li>
-<li><code>float</code> — números con decimales: <code>18.5</code>, <code>1013.25</code></li>
-<li><code>str</code> — texto: <code>"2026-01-15"</code></li>
-<li><code>bool</code> — verdadero/falso: <code>True</code>, <code>False</code></li>
+<li><code>int</code>: números enteros: <code>24</code>, <code>-3</code></li>
+<li><code>float</code>: números con decimales: <code>18.5</code>, <code>1013.25</code></li>
+<li><code>str</code>: texto: <code>"2026-01-15"</code></li>
+<li><code>bool</code>: verdadero o falso: <code>True</code>, <code>False</code></li>
 </ul></div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🧮</div>
   <h2>¿Cuánto da 0.1 + 0.2 en Python?</h2>
-  <p class="lead">¿Exactamente 0.3? Pruébenlo mentalmente antes de ver la respuesta.</p>
+  <p class="lead">¿0.3 exacto? Respondan antes de pasar.</p>
   <div class='hint'>→</div>
 </section>
 <section class="slide">
@@ -319,25 +319,25 @@ jupyter lab</pre></div>
 <span class="kw">False</span></pre></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>¿Por qué importa?</div>
-  <h2>Nunca comparar decimales con ==</h2>
+  <div class='slide-kicker'>Consecuencia</div>
+  <h2>Los decimales no se comparan con ==</h2>
   
   <div class="slide-body top"><ul class='bullets'>
 <li>La computadora guarda los decimales en binario, y muchos (como 0.1) no se pueden guardar exactos, igual que 1/3 no se puede escribir exacto en decimales (0.333...).</li>
-<li>No es un defecto de Python: pasa en casi todos los lenguajes.</li>
-<li>La forma correcta: comparar con una <strong>tolerancia</strong>: <code>np.isclose(0.1 + 0.2, 0.3)</code> da <code>True</code>.</li>
+<li>Pasa igual en Fortran, C y casi cualquier lenguaje.</li>
+<li>Se compara con una <strong>tolerancia</strong>: <code>np.isclose(0.1 + 0.2, 0.3)</code> da <code>True</code>.</li>
 <li>Lo vamos a necesitar en el Módulo 5, al comparar el WRF con observaciones.</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Modelo mental</div>
+  <div class='slide-kicker'>Variables</div>
   <h2>Una variable es una etiqueta, no una caja</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>En Python, una variable <strong>apunta</strong> a un objeto en memoria; no lo "contiene", como sí ocurriría en una caja física donde guardar algo distinto reemplaza lo anterior.</li>
-<li>Si el objeto es <strong>mutable</strong> (como una lista o un diccionario), modificarlo desde una función afecta al original — no a una copia.</li>
-<li>Si el objeto es <strong>inmutable</strong> (un número, un texto, una tupla), no hay este riesgo: cualquier "cambio" en realidad crea un objeto nuevo, y el original queda intacto.</li>
-<li>Esto explica un tipo de error muy común entre quienes recién empiezan: modificar sin querer un dato que se pensaba estaba "a salvo" fuera de la función.</li>
+<li>En Python, una variable <strong>apunta</strong> a un objeto en memoria. Dos variables pueden apuntar al mismo objeto.</li>
+<li>Si el objeto es <strong>mutable</strong> (como una lista o un diccionario), modificarlo desde una función cambia el original, no una copia.</li>
+<li>Si el objeto es <strong>inmutable</strong> (un número, un texto, una tupla), esto no pasa: cada cambio crea un objeto nuevo y el original queda igual.</li>
+<li>Es un error frecuente al empezar: una función cambia una lista que creíamos intacta.</li>
 </ul></div>
 </section>
 <section class="slide">
@@ -364,14 +364,14 @@ print(temperaturas)  <span class="c1"># [18.2, 19.0, 20.1, 21.5]</span></pre></d
 <section class="slide">
   <div class='slide-kicker'>Acceso a datos</div>
   <h2>Lista (posición) vs. diccionario (clave)</h2>
-  <div class="two-col"><div class="col-box acc-azul"><h3>Lista — por posición</h3><ul class='bullets'>
+  <div class="two-col"><div class="col-box acc-azul"><h3>Lista: por posición</h3><ul class='bullets'>
 <li><code>temperaturas[2]</code></li>
-<li>Frágil: hay que recordar el orden</li>
-<li>Útil cuando el orden mismo importa</li>
-</ul></div><div class="col-box acc-teal"><h3>Diccionario — por clave</h3><ul class='bullets'>
+<li>Hay que recordar el orden</li>
+<li>Sirve cuando el orden importa</li>
+</ul></div><div class="col-box acc-teal"><h3>Diccionario: por clave</h3><ul class='bullets'>
 <li><code>temperaturas["2026-01-03"]</code></li>
-<li>Autoexplicativo</li>
-<li>Acceso en tiempo prácticamente constante (tabla hash)</li>
+<li>La clave dice qué es cada dato</li>
+<li>Encontrar una clave tarda lo mismo con 10 o con un millón de datos (tabla hash)</li>
 </ul></div></div>
 </section>
 <section class="slide">
@@ -408,24 +408,24 @@ estaciones["Ceres"]["lat"]   <span class="c1"># -12.029</span></pre></div>
 </section>
 <section class="slide">
   <div class='slide-kicker'>Bucles</div>
-  <h2>for / while — iterar sin controlar índices</h2>
+  <h2>for y while</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><code>for temp in temperaturas:</code> en vez de <code>for i in range(len(temperaturas)):</code> cuando no se necesita la posición — más corto y más difícil de escribir mal.</li>
+<li><code>for temp in temperaturas:</code> en vez de <code>for i in range(len(temperaturas)):</code> cuando no se necesita la posición. Es más corto y hay menos donde equivocarse.</li>
 <li>Evita errores de <strong>"off-by-one"</strong>
 <ul class='bullets'>
-<li>Es el clásico error de contar mal el inicio o el final de un rango — por ejemplo, olvidar que en Python el conteo empieza en 0, no en 1, y terminar leyendo un dato de más o de menos.</li>
-<li>Al escribir <code>for temp in temperaturas:</code> ese error deja de ser posible, porque nunca se maneja el índice a mano.</li>
+<li>Contar mal el inicio o el final de un rango, por ejemplo olvidar que en Python se cuenta desde 0 y leer un dato de más o de menos.</li>
+<li>Con <code>for temp in temperaturas:</code> no hay índice que manejar, así que ese error no aparece.</li>
 </ul>
 </li>
-<li><code>while</code> cuando no se sabe de antemano cuántas iteraciones harán falta — por ejemplo, repetir un intento de descarga hasta que tenga éxito (idea que se retoma en el Módulo 3).</li>
+<li><code>while</code> cuando no se sabe de antemano cuántas vueltas harán falta, por ejemplo reintentar una descarga hasta que funcione (lo vemos en el Módulo 3).</li>
 </ul></div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">5</div>
     <h2>Funciones y organización</h2>
-    <p class="lead">El bloque de construcción de todo el resto del curso</p>
+    <p class="lead">Las vamos a usar todo el curso</p>
   </div>
 </section>
 <section class="slide">
@@ -433,12 +433,12 @@ estaciones["Ceres"]["lat"]   <span class="c1"># -12.029</span></pre></div>
   <h2>Una función = nombre + entradas + salida</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Permite reutilizar lógica sin copiar y pegar código: se escribe una vez, se usa muchas veces con distintos datos.</li>
+<li>Se escribe una vez y se usa muchas veces con distintos datos, sin copiar y pegar.</li>
 <li>Desde el Módulo 3 en adelante, cada tarea del pipeline (descargar, graficar, validar) se encapsula en funciones.</li>
 <li><strong>Scope (alcance):</strong> una variable definida dentro de una función no existe fuera de ella.
 <ul class='bullets'>
-<li>Ejemplo: si dentro de <code>calcular_promedio()</code> se crea una variable <code>suma</code>, esa <code>suma</code> desaparece apenas la función termina — no se puede usar después, afuera.</li>
-<li>Esto evita efectos secundarios inesperados: dos funciones distintas pueden usar el mismo nombre de variable internamente sin pisarse una a la otra.</li>
+<li>Si dentro de <code>calcular_promedio()</code> se crea <code>suma</code>, esa variable desaparece cuando la función termina.</li>
+<li>Por eso dos funciones pueden usar el mismo nombre de variable sin interferir.</li>
 </ul>
 </li>
 </ul></div>
@@ -453,14 +453,14 @@ estaciones["Ceres"]["lat"]   <span class="c1"># -12.029</span></pre></div>
 <section class="slide slide--check">
   <div class="icon">✅</div>
   <h2>Antes de pasar a la práctica</h2>
-  <p class="lead">¿Podrían explicar, con sus propias palabras, por qué mutar una lista dentro de una función afecta a la lista original fuera de ella?</p>
-  <div class='hint'>Si no están seguros, es la primera pregunta a resolver en la práctica de hoy.</div>
+  <p class="lead">¿Por qué modificar una lista dentro de una función cambia la lista de afuera? Expliquen con sus palabras.</p>
+  <div class='hint'>Si no lo tienen claro, lo vemos al empezar la práctica.</div>
 </section>
 <section class="slide slide--transition">
   <div class="icon">💻</div>
   <h2>Pasamos a la práctica (3 h)</h2>
-  <p class="lead">Notebook: 02_practica_dia1.ipynb — 4 ejercicios, cada uno con 📘 ejemplo resuelto, ✍️ tu turno y ✔️ comprobación</p>
-  <div class="slide-body top"><ol class="practice-list"><li><strong>Estadísticas manuales</strong> sobre las temperaturas reales de un día en La Molina (sin NumPy todavía).</li><li><strong>Diccionarios anidados</strong> — 5 estaciones de SENAMHI en Lima, y dónde faltan datos (2b).</li><li><strong>Clasificación</strong> de la lluvia y de la temperatura máxima diaria, con los días «sin dato».</li><li><strong>Script independiente</strong> — <code>clasificar_precipitacion.py</code> y tu propio <code>temperatura_maxima_mio.py</code>, ejecutados desde la terminal.</li></ol></div>
+  <p class="lead">Notebook 02_practica_dia1.ipynb: 4 ejercicios, cada uno con 📘 ejemplo resuelto, ✍️ tu turno y ✔️ comprobación</p>
+  <div class="slide-body top"><ol class="practice-list"><li><strong>Estadísticas a mano</strong> con las temperaturas de un día en La Molina (todavía sin NumPy).</li><li><strong>Diccionarios anidados</strong> con 5 estaciones de SENAMHI en Lima, y dónde faltan datos (2b).</li><li><strong>Clasificación</strong> de la lluvia y de la temperatura máxima diaria, con los días «sin dato».</li><li><strong>Un script</strong>: <code>clasificar_precipitacion.py</code> y tu propio <code>temperatura_maxima_mio.py</code>, ejecutados desde la terminal.</li></ol></div>
 </section>
 <!-- bitacora -->
 <section class="slide">

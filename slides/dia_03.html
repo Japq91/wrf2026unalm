@@ -183,13 +183,13 @@ jupyter lab</pre></div>
 <section class="slide slide--quote">
   <blockquote>Hoy pasamos de tablas de estaciones a archivos de grilla: NetCDF y GRIB. Los ejemplos usan archivos de práctica; tu turno, un ERA5 real.</blockquote>
   
-  <div class="attrib">El Dataset genérico del Módulo 1 se vuelve concreto.</div>
+  <div class="attrib">El Dataset que ayer armamos a mano, hoy lo leemos de un archivo.</div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">1</div>
     <h2>NetCDF: un formato autodescriptivo</h2>
-    <p class="lead">No es solo un contenedor de números</p>
+    <p class="lead">El archivo dice qué contiene</p>
   </div>
 </section>
 <section class="slide">
@@ -200,19 +200,19 @@ jupyter lab</pre></div>
 <li><strong>Dimensiones</strong>
 <ul class='bullets'>
 <li>Ejes con nombre y tamaño: <code>time: 744</code>, <code>latitude: 121</code></li>
-<li>No tienen valores por sí mismas, solo definen "cuántos"</li>
+<li>No tienen valores; solo dicen cuántos elementos hay</li>
 </ul>
 </li>
 <li><strong>Variables</strong>
 <ul class='bullets'>
 <li>Arreglos de datos asociados a dimensiones</li>
-<li>Coordenadas (ej. <code>latitude</code>) vs. datos (ej. <code>t2m</code>)</li>
+<li>Coordenadas (como <code>latitude</code>) y datos (como <code>t2m</code>)</li>
 </ul>
 </li>
 <li><strong>Atributos</strong>
 <ul class='bullets'>
 <li>Metadatos clave-valor: <code>units</code>, <code>long_name</code>, <code>standard_name</code></li>
-<li>Globales: institución, historia de procesamiento</li>
+<li>Globales: institución, historial de procesamiento</li>
 </ul>
 </li>
 </ul></div>
@@ -222,25 +222,25 @@ jupyter lab</pre></div>
   <h2>Climate and Forecast Metadata Conventions</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Acuerdo de la comunidad sobre <strong>cómo nombrar y describir</strong> variables atmosféricas.</li>
-<li>Ej.: temperatura del aire a 2 m → <code>standard_name: air_temperature</code>, <code>units: K</code> — no un nombre libre como <code>"temp"</code>.</li>
-<li>Esto es lo que permite que herramientas genéricas (<code>xwrf</code>, Módulo 4) sepan qué hacer con una variable sin que el usuario se lo indique.</li>
+<li>Un acuerdo sobre <strong>cómo nombrar y describir</strong> las variables en un NetCDF.</li>
+<li>La temperatura del aire a 2 m lleva <code>standard_name: air_temperature</code> y <code>units: K</code>, en lugar de un nombre cualquiera como <code>"temp"</code>.</li>
+<li>Gracias a eso, librerías como <code>xwrf</code> (Módulo 4) reconocen una variable sin que se lo digamos.</li>
 </ul></div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🔍</div>
   <h2>¿En qué unidades creen que viene la temperatura en ERA5?</h2>
-  <p class="lead">K, °C o °F — decidan antes de abrir el archivo en la práctica.</p>
-  <div class='hint'>La convención CF de ERA5 usa Kelvin, no Celsius.</div>
+  <p class="lead">¿K, °C o °F? Respondan antes de abrir el archivo en la práctica.</p>
+  <div class='hint'>ERA5 sigue CF: la temperatura viene en Kelvin.</div>
 </section>
 <section class="slide">
   <div class='slide-kicker'>Lazy loading (carga perezosa)</div>
-  <h2>Apertura "perezosa" con Xarray</h2>
+  <h2>Apertura perezosa con Xarray</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><code>xr.open_dataset(archivo)</code> lee solo metadatos (dimensiones, coordenadas, atributos), no todos los valores de inmediato.</li>
-<li>Los datos reales se leen del disco solo cuando se necesitan (graficar, reducir, exportar) — abrir el archivo es casi instantáneo, sin importar su tamaño.</li>
-<li>Importa porque archivos como <code>wrfout</code> o ERA5 de varios días pueden pesar cientos de MB a varios GB: si <code>open_dataset</code> cargara todo a memoria de inmediato, simplemente inspeccionar qué contiene un archivo sería lento.</li>
+<li><code>xr.open_dataset(archivo)</code> lee primero los metadatos (dimensiones, coordenadas, atributos), no los valores.</li>
+<li>Los valores se leen del disco cuando hacen falta (al graficar, promediar o exportar). Por eso abrir un archivo grande tarda casi lo mismo que uno chico.</li>
+<li>Un <code>wrfout</code> o un ERA5 de varios días puede pesar varios GB. Sin esto, solo mirar qué variables tiene ya tomaría tiempo.</li>
 </ul></div>
 </section>
 <section class="slide">
@@ -255,29 +255,29 @@ ds["t2m"].attrs   <span class="c1"># {'units': 'K', 'standard_name': 'air_temper
 ds.attrs["Conventions"]   <span class="c1"># 'CF-1.7'</span></pre></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Por qué importa para el WRF</div>
-  <h2>Este módulo es la bisagra del curso</h2>
+  <div class='slide-kicker'>Relación con el WRF</div>
+  <h2>Los formatos que entran y salen del WRF</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>El WRF consume datos de entrada casi siempre en <strong>GRIB2</strong> (de modelos operativos como GFS o ECMWF) o <strong>NetCDF</strong> (ERA5, tras conversión).</li>
-<li>Produce sus propias salidas (<code>wrfout</code>) en <strong>NetCDF</strong>.</li>
-<li>Descarga (Módulo 3), lectura de <code>wrfout</code> (Módulo 4) y validación (Módulo 5) asumen que ya sabemos abrir cualquiera de estos formatos.</li>
+<li>Los datos de entrada del WRF suelen venir en <strong>GRIB2</strong> (GFS, ECMWF) o en <strong>NetCDF</strong> (ERA5).</li>
+<li>Sus salidas (<code>wrfout</code>) son <strong>NetCDF</strong>.</li>
+<li>Desde el Módulo 3 abrimos estos archivos todos los días.</li>
 </ul></div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">2</div>
     <h2>GRIB/GRIB2: un formato orientado a mensajes</h2>
-    <p class="lead">La otra cara de la moneda frente a NetCDF</p>
+    <p class="lead">El formato de los centros operativos</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Dos filosofías distintas</div>
+  <div class='slide-kicker'>Comparación</div>
   <h2>NetCDF vs. GRIB</h2>
   <div class="two-col"><div class="col-box acc-azul"><h3>NetCDF</h3><ul class='bullets'>
-<li>Un único archivo, estructura jerárquica coherente</li>
+<li>Un archivo con una estructura única</li>
 <li>Nombres de variable en texto libre</li>
-<li>Más simple de inspeccionar</li>
+<li>Fácil de inspeccionar</li>
 </ul></div><div class="col-box acc-ambar"><h3>GRIB/GRIB2 (GRIdded Binary)</h3><ul class='bullets'>
 <li>Secuencia de <strong>mensajes independientes</strong></li>
 <li>Cada mensaje: 1 variable, 1 nivel, 1 instante</li>
@@ -286,18 +286,17 @@ ds.attrs["Conventions"]   <span class="c1"># 'CF-1.7'</span></pre></div>
 </ul></div></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>El puente</div>
+  <div class='slide-kicker'>cfgrib</div>
   <h2>cfgrib traduce GRIB a Dataset de Xarray</h2>
   
   <div class="slide-body top"><ul class='bullets'>
 <li>En un GRIB las variables no vienen con nombre sino con un <strong>código numérico</strong>.</li>
 <li><code>cfgrib</code> traduce esos códigos a nombres (<code>t2m</code>, <code>u10</code>…) con unidades, usando unas tablas internacionales.</li>
 <li>Al final se obtiene el mismo <code>Dataset</code> de Xarray que con un NetCDF: no hace falta conocer los códigos.</li>
-<li>Lo que sí conviene: revisar <code>long_name</code> y <code>units</code> después de abrir, porque el nombre corto cambia entre fuentes (<code>2t</code> vs. <code>t2m</code>).</li>
+<li>Igual conviene revisar <code>long_name</code> y <code>units</code> después de abrir, porque el nombre corto cambia entre fuentes (<code>2t</code> vs. <code>t2m</code>).</li>
 </ul>
 </li>
-<li>Homogeneiza la experiencia frente a NetCDF: mismo <code>Dataset</code> de Xarray al final, sin importar de qué formato vino.</li>
-<li>GRIB es preferido para difusión operativa (archivos pequeños, transmisión rápida) — por eso GFS (el modelo operativo de EE.UU.) llega en este formato.</li>
+<li>Los centros operativos distribuyen en GRIB porque los archivos son más chicos. Por eso GFS llega en este formato.</li>
 </ul></div>
 </section>
 <section class="slide">
@@ -310,28 +309,28 @@ ds_grib.data_vars   <span class="c1"># puede llamarse '2t' en vez de 't2m'</span
 </section>
 <section class="slide">
   <div class='slide-kicker'>Cuidado</div>
-  <h2>Los nombres de variable NO son universales entre fuentes</h2>
+  <h2>Cada fuente nombra las variables a su manera</h2>
   
   <div class="slide-body top"><ul class='bullets'>
 <li>La misma variable física (temperatura a 2 m) puede llamarse <code>t2m</code> en un archivo y <code>2t</code> en otro.</li>
-<li>No asumir que el nombre es el mismo — este problema se resuelve formalmente recién en el Módulo 3, al automatizar la descarga de varias fuentes.</li>
+<li>Revisen el nombre en cada archivo. En el Módulo 3, al descargar de varias fuentes, nos vamos a topar con esto.</li>
 </ul></div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">3</div>
     <h2>Selección, recorte e interpolación</h2>
-    <p class="lead">Las operaciones espaciales que se usan en todo el resto del curso</p>
+    <p class="lead">Lo que haremos con casi todos los archivos del curso</p>
   </div>
 </section>
 <section class="slide slide--check">
   <div class="icon">⚠️</div>
   <h2>El error más común de este módulo</h2>
   <p class="lead">¿Qué pasa si hago .sel(latitude=slice(sur, norte)) sobre un dataset con latitud descendente?</p>
-  <div class='hint'>Spoiler: no da error. Da un resultado vacío. Por eso es peligroso.</div>
+  <div class='hint'>No da error: devuelve un resultado vacío, y es fácil no darse cuenta.</div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>El gotcha real</div>
+  <div class='slide-kicker'>Lo que pasa</div>
   <h2>Orden de la latitud: ascendente vs. descendente</h2>
   
   <div class="slide-body top"><pre class="code-block"><span class="c1"># ERA5 real: latitud DESCENDENTE (90° -> -90°)</span>
@@ -344,12 +343,12 @@ ds.sel(latitude=slice(-20, 10))   <span class="c1"># ¡tamaño 0, sin error!</sp
 ds.sel(latitude=slice(10, -20))</pre></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Dos formas de "buscar un punto"</div>
+  <div class='slide-kicker'>Dos formas de sacar el valor en un punto</div>
   <h2>.sel(nearest) vs. .interp(linear)</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><code>.sel(method="nearest")</code> — valor <strong>exacto</strong> del punto de grilla más cercano, sin cálculo.</li>
-<li><code>.interp(method="linear")</code> — <strong>calcula</strong> un valor nuevo, ponderado por distancia a los nodos vecinos.</li>
+<li><code>.sel(method="nearest")</code>: el valor del punto de grilla más cercano, tal cual.</li>
+<li><code>.interp(method="linear")</code>: <strong>calcula</strong> un valor nuevo a partir de los nodos vecinos, pesando cada uno según su distancia.</li>
 <li>En 2D esto es interpolación <strong>bilineal</strong>.</li>
 </ul></div>
 </section>
@@ -357,34 +356,34 @@ ds.sel(latitude=slice(10, -20))</pre></div>
   <div class='slide-kicker'>Interpolación bilineal</div>
   <h2>Ponderar por distancia a 4 nodos</h2>
   <div class="formula-box big">f(x,y) ≈ w<sub>11</sub>f(Q<sub>11</sub>) + w<sub>21</sub>f(Q<sub>21</sub>) + w<sub>12</sub>f(Q<sub>12</sub>) + w<sub>22</sub>f(Q<sub>22</sub>)</div>
-  <p class='lead'>Sustento: Q₁₁, Q₁₂, Q₂₁, Q₂₂ son los 4 nodos de grilla que rodean al punto (x,y) que nos interesa — dos en la fila de abajo, dos en la de arriba, dos a la izquierda, dos a la derecha. f(Q₁₁) es el valor conocido (temperatura, por ejemplo) en ese nodo. Cada w (peso) es un número entre 0 y 1 que depende de qué tan cerca está (x,y) de ese nodo en particular; los cuatro pesos siempre suman 1.</p>
+  <p class='lead'>Q₁₁, Q₁₂, Q₂₁ y Q₂₂ son los 4 nodos que rodean al punto (x,y). f(Q) es el valor en cada nodo, por ejemplo la temperatura. Cada peso w está entre 0 y 1, depende de la distancia de (x,y) a ese nodo, y los cuatro suman 1.</p>
   <div class="slide-body top"><ul class='bullets'>
-<li>No hace falta memorizar la fórmula exacta ni calcular los pesos a mano — Xarray lo hace internamente al llamar <code>.interp()</code>.</li>
-<li>La idea central: cuanto más cerca esté el punto de un nodo, mayor es su peso w, y más influye ese nodo en el resultado final.</li>
-<li>Ejemplo simple (una sola dimensión, para no complicar el cálculo): si a las 12:00 hace 20°C y a las 13:00 hace 22°C, el valor interpolado a las 12:30 (justo a la mitad) es 21°C — el promedio simple, porque está exactamente a mitad de camino entre ambos.
+<li>No hace falta calcular los pesos a mano: <code>.interp()</code> lo hace.</li>
+<li>Cuanto más cerca está el punto de un nodo, más pesa ese nodo.</li>
+<li>En una dimensión: si a las 12:00 hay 20 °C y a las 13:00 hay 22 °C, a las 12:30 la interpolación da 21 °C.
 <ul class='bullets'>
-<li>Si en cambio se quisiera el valor a las 12:15 (un cuarto del camino), el resultado pesa más hacia el valor de las 12:00: 20.5°C, no 21°C.</li>
+<li>A las 12:15 da 20,5 °C: está más cerca de las 12:00, así que ese valor pesa más.</li>
 </ul>
 </li>
-<li>Se reutiliza en el Módulo 5 para interpolar el WRF a una estación observacional.</li>
+<li>En el Módulo 5 llevamos el WRF a una estación. Allí usamos el punto más cercano, porque las coordenadas del <code>wrfout</code> son 2D y <code>.interp()</code> necesita coordenadas 1D.</li>
 </ul></div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🗺️</div>
-  <h2>¿Nearest o interp — cuál usarían para precipitación convectiva?</h2>
-  <p class="lead">Piensen en qué tan "suave" es la variable en el espacio.</p>
-  <div class='hint'>La precipitación convectiva es muy heterogénea espacialmente — inventar un valor intermedio puede ser engañoso.</div>
+  <h2>Para lluvia convectiva, ¿usarían nearest o interp?</h2>
+  <p class="lead">Piensen en cuánto cambia esa variable de un punto a otro.</p>
+  <div class='hint'>La lluvia convectiva cambia mucho en pocos kilómetros. Un valor intermedio puede no parecerse a lo que cayó en ningún punto.</div>
 </section>
 <section class="slide slide--quote">
-  <blockquote>No se puede tratar wrfout como un dataset genérico sin decodificación adicional.</blockquote>
+  <blockquote>El wrfout es un NetCDF, pero no se puede usar como cualquier otro: hay que interpretar su grilla y sus variables.</blockquote>
   
-  <div class="attrib">Adelanto del Módulo 4 — hoy sembramos las herramientas que se usarán ahí.</div>
+  <div class="attrib">Lo vemos en el Módulo 4, con lo que aprendemos hoy.</div>
 </section>
 <section class="slide slide--transition">
   <div class="icon">💻</div>
   <h2>Pasamos a la práctica (3 h)</h2>
   <p class="lead">Notebooks: 02, 03 y 04 del Módulo 2</p>
-  <div class="slide-body top"><ol class="practice-list"><li><strong>Inspección de un NetCDF</strong> tipo ERA5 (unidades, orden de latitud, convención CF), + refuerzo repitiendo la inspección sobre otra variable (<code>msl</code>, Pa vs. hPa).</li><li><strong>Apertura de un GRIB2</strong> con <code>cfgrib</code>, comparación de nombres de variable.</li><li><strong>Recorte de dominio y periodo</strong> — verificando el orden de latitud antes de recortar.</li><li><strong>Interpolación a un punto</strong> — nearest vs. linear, y (opcional) verificación manual de la fórmula bilineal.</li></ol></div>
+  <div class="slide-body top"><ol class="practice-list"><li><strong>Inspección de un NetCDF</strong> tipo ERA5 (unidades, orden de latitud, convención CF), y lo mismo con el ERA5 del repositorio.</li><li><strong>Apertura de un GRIB2</strong> con <code>cfgrib</code>, comparación de nombres de variable.</li><li><strong>Recorte de dominio y periodo</strong>, revisando antes el orden de la latitud.</li><li><strong>Interpolación a un punto</strong>: nearest y linear, y (opcional) la fórmula bilineal a mano.</li></ol></div>
 </section>
 <!-- bitacora -->
 <section class="slide">

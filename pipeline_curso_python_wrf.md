@@ -1,16 +1,15 @@
 # Pipeline de Trabajo — Curso de Python Aplicado al WRF
 
-> Documento explicativo. Consolida el flujo técnico enseñado en el curso a partir del
-> análisis de las versiones de la propuesta técnica del curso.
-> No es código ni un cronograma: describe **qué problema resuelve cada etapa, con qué
-> herramientas y qué produce como salida**, para tenerlo como referencia única del curso.
+> Resume el flujo técnico del curso a partir de las versiones de su propuesta
+> técnica. Para cada etapa dice **qué problema resuelve, con qué herramientas y qué
+> produce**. El código y el cronograma están en `src/`.
 
 ## 1. Visión general
 
-El curso enseña a automatizar en Python el ciclo completo de trabajo de un modelador
-que usa WRF (*Weather Research and Forecasting model*). Ese ciclo tiene tres grandes
-momentos —**entrada, salida y validación**— y todas las versiones de la propuesta
-coinciden en ese mismo eje, aunque difieren en profundidad y herramientas:
+El curso enseña a automatizar en Python el trabajo que rodea al WRF (*Weather
+Research and Forecasting model*). Ese trabajo tiene tres etapas, **entrada, salida
+y validación**, presentes en todas las versiones de la propuesta, aunque con
+distinta profundidad y herramientas:
 
 ```mermaid
 flowchart LR
@@ -63,8 +62,8 @@ pero sin experiencia en programación. Por eso:
      error aunque esté incompleta, así que «ejecutar todo» nunca se rompe.
   3. **Comprobar**, que responde ✅ si el resultado es correcto, ❌ con una pista,
      o ⏳ si todavía no se completó.
-- **Desde el Día 3, datos reales:** los ejemplos pueden usar datos sintéticos
-  (rotulados como tales). Los «tu turno» usan los datos reales del repositorio:
+- **Datos del repositorio desde el Día 3:** los ejemplos pueden usar datos
+  sintéticos (indicados como tales). Los «tu turno» usan los datos del repositorio:
   SENAMHI en `data/senamhi/` y ERA5 en `data/era_muestra/`.
 - **Preguntas de interpretación:** el participante escribe su respuesta en una
   celda propia. La respuesta modelo está oculta en una sección desplegable,
@@ -86,7 +85,7 @@ Descargar y preparar estos datos manualmente es lento y propenso a error.
 
 **Flujo:**
 
-1. **Entender los formatos fuente** — NetCDF (con convenciones CF) y GRIB/GRIB2, el
+1. **Entender los formatos fuente**: NetCDF (con convenciones CF) y GRIB/GRIB2, el
    formato binario estándar en meteorología operativa.
    - Lectura NetCDF → `xarray`
    - Lectura GRIB/GRIB2 → `cfgrib`
@@ -98,14 +97,14 @@ Descargar y preparar estos datos manualmente es lento y propenso a error.
    - `cdsapi` → ERA5 (requiere credenciales de cuenta CDS configuradas antes del curso).
    - `Herbie` → acceso unificado a GFS/ECMWF desde múltiples fuentes, con selección
      programática de modelo, fecha y variable.
-4. **Parametrizar la descarga** — scripts que reciben fecha, área geográfica y
+4. **Parametrizar la descarga**: scripts que reciben fecha, área geográfica y
    variables como argumentos, pensados para correr de forma recurrente (p. ej. cada
    vez que se lanza una nueva simulación). Los parámetros se validan antes de
    contactar al servidor. Por ejemplo, si las fechas están invertidas o el periodo
    cruza de un mes a otro (CDS pide un pedido por mes), el script avisa con un
    mensaje claro en vez de fallar más adelante.
 5. **Verificar integridad** de lo descargado antes de alimentarlo al WRF.
-6. **Preprocesar** — convertir GRIB2 a NetCDF, recortar dominio, interpolar a la
+6. **Preprocesar**: convertir GRIB2 a NetCDF, recortar dominio, interpolar a la
    grilla necesaria (`xarray` + `scipy`).
 
 **Salida de la etapa:** archivos de entrada verificados y en el formato correcto,
@@ -119,7 +118,7 @@ variables físicas legibles y comunicar el resultado visualmente.
 
 **Flujo:**
 
-1. **Entender la estructura de `wrfout`** — variables nativas, dimensiones,
+1. **Entender la estructura de `wrfout`**: variables nativas, dimensiones,
    coordenadas y metadatos propios del WRF.
 2. **Extraer variables físicas** con `xwrf`, que traduce las variables nativas a
    variables estándar (temperatura, viento, presión, humedad, precipitación) sobre
@@ -127,9 +126,9 @@ variables físicas legibles y comunicar el resultado visualmente.
 3. **Generar mapas georreferenciados** con `cartopy` + `matplotlib`:
    temperatura en superficie, campos de viento, precipitación acumulada.
    Opcionalmente `geopandas` para superponer límites administrativos (shapefiles).
-4. **Series temporales y promedios espaciales** — reducir la dimensión espacial o
+4. **Series temporales y promedios espaciales**: reducir la dimensión espacial o
    temporal según el análisis que se necesite.
-5. **Animaciones** — combinar múltiples `wrfout` (distintos tiempos) en una
+5. **Animaciones**: combinar múltiples `wrfout` (distintos tiempos) en una
    secuencia animada.
 6. **Exportar resultados** de vuelta a NetCDF, para reutilizarlos o compartirlos.
 
@@ -145,17 +144,13 @@ realidad y si aporta algo frente a sus propios datos de entrada.
 
 **Flujo:**
 
-1. **Reunir observaciones** — estaciones meteorológicas superficiales, datos
-   satelitales o reanálisis usados como referencia "verdad terreno". En el
-   curso, estas observaciones son reales: mensajes SYNOP crudos de
-   estaciones de superficie, descargados y decodificados hora por hora (ver
-   "Herramientas auxiliares" más abajo) — nunca coordenadas ni valores
-   inventados. Toda estación usada para comparar contra el WRF o el modelo
-   global está verificada dentro del dominio real de la simulación; las
-   estaciones fuera de ese dominio (p. ej. Perú, para el caso de muestra
-   del curso, cuyo dominio real cubre Argentina/Uruguay/sur de Brasil) se
-   usan solo para práctica de carga y análisis puramente observacional,
-   nunca para "inventar" una correspondencia espacial que no existe.
+1. **Reunir observaciones**: estaciones de superficie, satélite o
+   reanálisis como referencia. En el curso usamos mensajes SYNOP de
+   estaciones de superficie, decodificados hora por hora (ver «Herramientas
+   auxiliares» más abajo). Para comparar con el WRF solo se usan estaciones
+   dentro del dominio de la simulación (Argentina, Uruguay y el sur de
+   Brasil). Las estaciones de Perú quedan fuera de ese dominio y se usan
+   para practicar la lectura de datos y para comparar ERA5 con ERA5-Land.
 2. **Llevar la salida del WRF al punto de observación** (para poder comparar
    punto a punto). Con el `wrfout` se toma el **punto de grilla más cercano** a la
    estación, porque su latitud y su longitud son tablas 2D y `.interp()` de
@@ -168,15 +163,15 @@ realidad y si aporta algo frente a sus propios datos de entrada.
    - MAE (error absoluto medio)
    - Correlación de Pearson (r)
    - KGE (Kling–Gupta), que descompone el error en correlación, sesgo y
-     variabilidad — métrica más completa, presente desde la v2 en adelante.
+     variabilidad (presente desde la v2).
    - Las métricas se calculan **estación por estación**, además de en forma
      agregada. Juntar todas las estaciones en una sola serie infla `r` y el
      KGE, porque la diferencia de temperatura entre estaciones es fácil de
      reproducir para cualquier modelo.
-4. **Evaluar el "added value"** — comparar las métricas del WRF contra las de su
+4. **Evaluar el "added value"**: comparar las métricas del WRF contra las de su
    propio dato de forzamiento (p. ej. ERA5) frente a las observaciones, para
-   verificar si la simulación de alta resolución realmente mejora algo.
-5. **Visualizar la validación** — diagramas de dispersión, diagramas de Taylor
+   ver si la simulación de alta resolución mejora algo.
+5. **Visualizar la validación**: diagramas de dispersión, diagramas de Taylor
    (resumen de correlación, desviación estándar y RMSE en un solo gráfico,
    construidos con el paquete `SkillMetrics`), y tablas comparativas.
 6. **Automatizar el cálculo** para múltiples variables y períodos, en vez de
@@ -185,29 +180,22 @@ realidad y si aporta algo frente a sus propios datos de entrada.
 **Salida de la etapa:** métricas cuantitativas y gráficos de validación que
 respaldan (o cuestionan) la calidad de la simulación.
 
-**Herramientas auxiliares desarrolladas/usadas para esta etapa (no son el
-foco de enseñanza del curso, solo el medio para tener datos reales con
-que validar):**
-- Scripts propios de descarga y decodificación de reportes SYNOP de
-  OGIMET (`requests` para la descarga, `pymetdecoder` para decodificar el
-  mensaje crudo a temperatura/viento/precipitación por hora) — el
-  resultado (observación real, hora real, punto real) es lo que entra al
-  resto del pipeline; el scraping en sí no se enseña como contenido del
-  curso. `data/h0_datos_ogimet.sh` orquesta los tres pasos
-  (`h1_ogimet.py` descarga → `h2_procesa_horario.py` decodifica →
-  `h3_junta_mensual.py` consolida el mes) para un rango de fechas; no es
-  foco de clase, pero se muestra como ejemplo de herramienta ya lista
-  para conseguir datos observados reales.
-- `SkillMetrics` (paquete existente, no desarrollado en el curso) para
-  construir los diagramas de Taylor, en vez de reimplementar la geometría
-  polar a mano — mismo principio de "usar la herramienta estándar del
-  ecosistema" que ya aplica `xwrf` en la Etapa 2.
+**Herramientas auxiliares de esta etapa** (se usan para conseguir las
+observaciones, pero no se enseñan en clase):
+- Scripts de descarga y decodificación de reportes SYNOP de OGIMET
+  (`requests` para bajarlos y `pymetdecoder` para pasar el mensaje a
+  temperatura, viento y precipitación por hora). `data/h0_datos_ogimet.sh`
+  corre los tres pasos para un rango de fechas: `h1_ogimet.py` descarga,
+  `h2_procesa_horario.py` decodifica y `h3_junta_mensual.py` junta el mes.
+  En clase se muestran como ejemplo para quien quiera otras estaciones.
+- `SkillMetrics`, un paquete existente, para dibujar los diagramas de
+  Taylor sin programar la geometría polar a mano, igual que `xwrf` en la
+  Etapa 2.
 
 ## 6. Etapa de cierre — Integración en un pipeline reproducible
 
-Presente como módulo explícito desde la v2 en adelante. No añade una técnica
-nueva: consolida las tres etapas anteriores en un flujo único, reproducible y
-parametrizado.
+Es un módulo aparte desde la v2. No agrega técnicas nuevas: junta las tres
+etapas anteriores en un solo flujo, configurado desde un archivo.
 
 **Flujo:**
 
@@ -215,14 +203,13 @@ parametrizado.
    / resultados).
 2. Aplicar **buenas prácticas de código** (parametrización, funciones reutilizables
    en vez de notebooks sueltos).
-3. Ejecutar el **flujo completo de punta a punta** — descarga → preprocesamiento →
-   visualización → validación — sobre un caso de muestra, como práctica integradora
-   final del curso. En clase, la descarga de ERA5 de esta etapa es **sintética**
+3. Ejecutar el **flujo completo** (descarga → preprocesamiento → visualización →
+   validación) sobre un caso nuevo, como práctica final del curso. En clase, la descarga de ERA5 de esta etapa es **sintética**
    (genera un archivo con la misma estructura que el real), para que el pipeline
    corra sin esperar la cola de Copernicus. La descarga real ya se practicó en la
    Etapa 1, y en un proyecto propio se reemplaza sin cambiar el resto del
    pipeline.
-4. **Versionar el proyecto con Git** — `git init`, un `.gitignore` que excluye
+4. **Versionar el proyecto con Git**: `git init`, un `.gitignore` que excluye
    datos, resultados y `__pycache__/`, y un primer commit que incluye el código,
    la configuración, el `environment.yml` y el notebook final.
 
@@ -239,14 +226,11 @@ parametrizado.
 | Prácticas de los primeros días | — | — | — | — | Ejemplo resuelto + tu turno + comprobación |
 | Reproducibilidad del entorno | — | — | — | — | Versiones fijadas, kernel propio y CI |
 
-**Lectura del cambio:** v1 cubre el pipeline mínimo viable (descarga → mapa →
-métrica básica). A partir de v2 el pipeline se profesionaliza: se añade una
-segunda fuente de datos de entrada (`Herbie`), una capa de traducción de variables
-nativas del WRF (`xwrf`), métricas de validación más rigurosas (KGE, *added
-value*, Taylor) y un módulo dedicado a convertir todo en un pipeline reproducible
-en vez de una secuencia de notebooks independientes. v3 y v4 mantienen ese mismo
-pipeline técnico; sus diferencias son de nivel de entrada del curso y de formato
-del documento, no del flujo de trabajo en sí.
+**Qué cambió:** la v1 cubre lo mínimo (descarga → mapa → métrica básica). La
+v2 agrega una segunda fuente de entrada (`Herbie`), `xwrf` para leer las variables
+del WRF, más métricas de validación (KGE, *added value*, Taylor) y un módulo para
+juntar todo en un pipeline. La v3 y la v4 tienen el mismo flujo técnico; cambian
+el nivel de entrada del curso y el formato del documento.
 
 El repositorio 2026 mantiene el pipeline de v2 a v4 y cambia sobre todo la forma
 de enseñarlo. Las prácticas de los primeros días alternan un ejemplo resuelto con

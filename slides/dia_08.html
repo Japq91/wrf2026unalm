@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Día 8 — Interpolación y métricas de error (Módulo 5)</title>
+<title>Día 8 — Del WRF a la estación y métricas de error (Módulo 5)</title>
 <style>
 :root {
   --azul-950: #0a1f33;
@@ -160,7 +160,7 @@ table.cmp tr:nth-child(even) td { background: var(--gris-100); }
 <div class="deck">
 <section class="slide slide--title">
   <div class="day-badge">Clase 8 de 10 · Módulo 5 · Día 1 de 2</div>
-  <h1>Interpolación a observaciones y métricas de error</h1>
+  <h1>Del WRF a la estación y métricas de error</h1>
   <p class="lead">Curso Intermedio de Python Aplicado para el WRF</p>
   <div class="meta-row"><div class='meta-item'><b>Teoría</b>2 h</div><div class='meta-item'><b>Práctica</b>3 h</div><div class='meta-item'><b>Entorno</b>wrf2026</div></div>
 </section>
@@ -181,19 +181,19 @@ table.cmp tr:nth-child(even) td { background: var(--gris-100); }
 jupyter lab</pre></div>
 </section>
 <section class="slide slide--quote">
-  <blockquote>Un mapa bonito no demuestra que la simulación sea correcta.</blockquote>
+  <blockquote>Que el mapa se vea bien no dice si la simulación se parece a lo que pasó.</blockquote>
   
-  <div class="attrib">Hoy empezamos a responder: ¿qué tan bien reproduce el WRF la realidad observada?</div>
+  <div class="attrib">Hoy comparamos el WRF con observaciones.</div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">1</div>
     <h2>Tipos de datos observacionales</h2>
-    <p class="lead">Y una advertencia de circularidad importante</p>
+    <p class="lead">Y por qué ERA5 no siempre sirve como referencia</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Tres fuentes, tres naturalezas</div>
+  <div class='slide-kicker'>Tres fuentes</div>
   <h2>Estación vs. satélite vs. reanálisis</h2>
   <div class="slide-body top">
     <table class="cmp"><thead><tr><th></th><th>Estación</th><th>Satélite</th><th>Reanálisis</th></tr></thead><tbody><tr><td>Medición</td><td>Directa, puntual</td><td>Indirecta (retrieval)</td><td>Modelo + asimilación</td></tr><tr><td>Cobertura</td><td>Limitada al punto</td><td>Espacialmente extensa</td><td>Espacialmente extensa</td></tr><tr><td>Advertencia</td><td>No dice nada del punto vecino</td><td>Incertidumbre propia, nubes</td><td><strong>Circular</strong> si forzó al WRF</td></tr></tbody></table>
@@ -201,138 +201,138 @@ jupyter lab</pre></div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🔁</div>
-  <h2>¿Por qué usar ERA5 para validar el WRF puede ser "circular"?</h2>
-  <p class="lead">Piensen en de dónde salieron los datos de entrada del WRF (Módulo 3).</p>
-  <div class='hint'>Si el WRF fue forzado con ERA5, usar el propio ERA5 como "verdad" no es una fuente independiente — cambia la pregunta a "¿el WRF agrega algo frente a su forzante?" (Día 9: added value).</div>
+  <h2>¿Por qué validar el WRF con ERA5 puede ser circular?</h2>
+  <p class="lead">Piensen de dónde salieron los datos de entrada del WRF (Módulo 3).</p>
+  <div class='hint'>Si el WRF se forzó con ERA5, ERA5 no es una referencia independiente. La pregunta pasa a ser si el WRF mejora algo respecto de lo que recibió (Día 9: added value).</div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">2</div>
-    <h2>Interpolar el modelo al punto de observación</h2>
-    <p class="lead">La misma técnica del Módulo 2, en la dirección opuesta</p>
+    <h2>Llevar el modelo al punto de la estación</h2>
+    <p class="lead">Lo que vimos en los Módulos 2 y 4, aplicado a la validación</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Dirección invertida</div>
-  <h2>Del Módulo 4 (grilla → punto cercano) a hoy (grilla → punto exacto)</h2>
+  <div class='slide-kicker'>Nearest o interp</div>
+  <h2>¿Qué valor del modelo comparamos con la estación?</h2>
   
   <div class="slide-body top"><ul class='bullets'>
 <li>La estación casi nunca coincide con un nodo de grilla exacto.</li>
-<li><code>.sel(nearest)</code> vs. <code>.interp(linear)</code>: decidir según qué tan suave sea la variable en el espacio.</li>
-<li>Temperatura → interpolar. Precipitación convectiva (heterogénea) → el vecino más cercano puede ser más honesto.</li>
+<li>En una grilla con coordenadas 1D (ERA5) se puede elegir entre <code>.sel(nearest)</code> y <code>.interp(linear)</code>, según cuánto cambie la variable de un punto a otro.</li>
+<li>Con el <code>wrfout</code>, las coordenadas son 2D y <code>.interp()</code> no funciona. Usamos el punto de grilla más cercano, como en el Módulo 4. Con celdas de pocos km, para la temperatura la diferencia con una interpolación es pequeña.</li>
 </ul></div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">3</div>
     <h2>Métricas de error</h2>
-    <p class="lead">Qué mide cada una — y por qué ninguna sola basta</p>
+    <p class="lead">Qué mide cada una, y por qué se reportan varias</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Un ejemplo que usamos en las próximas 3 diapositivas</div>
+  <div class='slide-kicker'>El ejemplo de las próximas diapositivas</div>
   <h2>3 horas, 3 pares de valores</h2>
   
   <div class="slide-body top"><ul class='bullets'>
 <li>Hora 1: observado 20°C, simulado 22°C (error = +2)</li>
 <li>Hora 2: observado 18°C, simulado 17°C (error = −1)</li>
 <li>Hora 3: observado 25°C, simulado 28°C (error = +3)</li>
-<li>Con estos mismos 3 valores calculamos bias, MAE y RMSE, para comparar directamente qué mide cada fórmula sobre el mismo caso.</li>
+<li>Con estos 3 pares calculamos bias, MAE y RMSE, para ver qué mide cada fórmula.</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Sustento matemático — glosario de símbolos</div>
+  <div class='slide-kicker'>Notación</div>
   <h2>Qué significa cada letra en las fórmulas siguientes</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><strong>n</strong> — número total de pares observado/simulado disponibles (en nuestro ejemplo, n = 3: las 3 horas).</li>
-<li><strong>i</strong> — un índice que recorre cada par, de 1 a n (i = 1, 2, 3 en nuestro ejemplo). Sirve para referirse "al dato número i", sea cual sea.</li>
-<li><strong>s&lt;sub&gt;i&lt;/sub&gt;</strong> — el valor <strong>s</strong>imulado (por el WRF, o por el modelo que se esté validando) en el momento i.</li>
-<li><strong>o&lt;sub&gt;i&lt;/sub&gt;</strong> — el valor <strong>o</strong>bservado (la medición real) en ese mismo momento i.</li>
-<li><strong>Σ</strong> (sigma mayúscula) — el símbolo de "sumatoria": sumar el término que sigue, una vez por cada valor de i, de 1 a n. Ej.: Σ(s&lt;sub&gt;i&lt;/sub&gt; − o&lt;sub&gt;i&lt;/sub&gt;) para n=3 significa (s₁−o₁) + (s₂−o₂) + (s₃−o₃).</li>
-<li><strong>s̄, ō</strong> (con una barra encima) — el <strong>promedio</strong> de todos los valores simulados, y de todos los observados, respectivamente.</li>
+<li><strong>n</strong>: número de pares observado/simulado (en el ejemplo, n = 3).</li>
+<li><strong>i</strong>: el número de cada par, de 1 a n.</li>
+<li><strong>s<sub>i</sub></strong>: el valor <strong>s</strong>imulado (por el WRF o el modelo que se valida) en el momento i.</li>
+<li><strong>o<sub>i</sub></strong>: el valor <strong>o</strong>bservado en ese mismo momento.</li>
+<li><strong>Σ</strong>: suma del término que sigue para i de 1 a n. Con n = 3, Σ(s<sub>i</sub> − o<sub>i</sub>) es (s₁−o₁) + (s₂−o₂) + (s₃−o₃).</li>
+<li><strong>s̄, ō</strong>: el <strong>promedio</strong> de los valores simulados y de los observados.</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Sesgo sistemático</div>
+  <div class='slide-kicker'>Sesgo</div>
   <h2>bias</h2>
   <div class="formula-box ">bias = promedio de (simulado − observado) &nbsp;→&nbsp; <code>np.mean(sim - obs)</code></div>
-  <p class='lead'>En palabras: el promedio de todas las diferencias (simulado menos observado). Mide sobre/subestimación. No dice nada sobre la dispersión de los errores individuales.</p>
+  <p class='lead'>El promedio de las diferencias simulado menos observado. Dice si el modelo sobreestima o subestima, pero no cuánto se dispersan los errores.</p>
   <div class="slide-body top"><ul class='bullets'>
-<li>Con nuestro ejemplo (n=3): bias = (2 + (−1) + 3) / 3 = 4/3 ≈ <strong>+1.33 °C</strong> — en promedio, el modelo sobreestima poco más de un grado.</li>
+<li>En el ejemplo: bias = (2 + (−1) + 3) / 3 = 4/3 ≈ <strong>+1,33 °C</strong>. En promedio, el modelo sobreestima un poco más de un grado.</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Magnitud del error</div>
-  <h2>MAE — error absoluto medio</h2>
+  <div class='slide-kicker'>Tamaño del error</div>
+  <h2>MAE: error absoluto medio</h2>
   <div class="formula-box ">MAE = promedio de |simulado − observado| &nbsp;→&nbsp; <code>np.mean(np.abs(sim - obs))</code></div>
-  <p class='lead'>En palabras: igual que bias, pero tomando el valor absoluto |·| de cada diferencia ANTES de promediar — así un error de +2 y uno de −2 no se cancelan entre sí, ambos cuentan como "error de magnitud 2".</p>
+  <p class='lead'>Como el bias, pero con el valor absoluto de cada diferencia antes de promediar. Así un error de +2 y uno de −2 no se cancelan: los dos cuentan 2.</p>
   <div class="slide-body top"><ul class='bullets'>
-<li>Con nuestro ejemplo: MAE = (|2| + |−1| + |3|) / 3 = 6/3 = <strong>2.0 °C</strong> — noten que es mayor que el bias (1.33), porque aquí los errores no se cancelan entre sí (el −1 ya no resta, suma en valor absoluto).</li>
+<li>En el ejemplo: MAE = (|2| + |−1| + |3|) / 3 = 6/3 = <strong>2,0 °C</strong>. Es mayor que el bias (1,33) porque el −1 ya no resta.</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Penaliza errores grandes</div>
-  <h2>RMSE — raíz del error cuadrático medio</h2>
+  <div class='slide-kicker'>Pesa más los errores grandes</div>
+  <h2>RMSE: raíz del error cuadrático medio</h2>
   <div class="formula-box ">RMSE = raíz del promedio de (simulado − observado)² &nbsp;→&nbsp; <code>np.sqrt(np.mean((sim - obs)**2))</code></div>
-  <p class='lead'>En palabras: se eleva cada diferencia AL CUADRADO (en vez de al valor absoluto), se promedian esos cuadrados, y al final se le saca raíz cuadrada al resultado — ese último paso es lo que devuelve el resultado a las unidades originales (°C, mm, etc.), en vez de °C².</p>
+  <p class='lead'>Cada diferencia se eleva al cuadrado, se promedian los cuadrados y se saca la raíz. La raíz devuelve el resultado a las unidades de la variable (°C en vez de °C²).</p>
   <div class="slide-body top"><ul class='bullets'>
-<li>Con nuestro ejemplo: RMSE = √[(2² + (−1)² + 3²)/3] = √(14/3) = √4.67 ≈ <strong>2.16 °C</strong> — más alto que el MAE (2.0), porque el error más grande (3) pesa más al elevarlo al cuadrado (3²=9, frente a solo 3 en MAE).</li>
-<li>Al elevar al cuadrado, penaliza más los errores grandes que los pequeños: un error de 4 pesa 16 (no 4) antes de la raíz, cuatro veces más que uno de 2 (que pesa 4) — no el doble, como pesaría en MAE.</li>
-<li><strong>RMSE ≥ MAE siempre</strong> — cuanto mayor la diferencia entre ambas, más "irregular" es el error (pocos errores grandes en vez de muchos moderados).</li>
+<li>En el ejemplo: RMSE = √[(2² + (−1)² + 3²)/3] = √(14/3) ≈ <strong>2,16 °C</strong>. Es mayor que el MAE (2,0) porque el error de 3 pesa 9 al elevarlo al cuadrado.</li>
+<li>Un error de 4 pesa 16 antes de la raíz, cuatro veces lo que pesa uno de 2. En el MAE pesaría el doble.</li>
+<li><strong>Siempre RMSE ≥ MAE</strong>. Si el RMSE es bastante mayor que el MAE, hay pocos errores grandes más que muchos moderados.</li>
 </ul></div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🧮</div>
   <h2>¿Puede RMSE ser menor que MAE alguna vez?</h2>
-  <p class="lead">Piensen en el ejemplo: ¿qué pasa con un error de 3 al elevarlo al cuadrado?</p>
-  <div class='hint'>No, nunca — es una consecuencia matemática de elevar al cuadrado vs. tomar valor absoluto. Nuestro ejemplo (2.16 &gt; 2.0) lo confirma.</div>
+  <p class="lead">Vuelvan al ejemplo: ¿qué pasa con un error de 3 al elevarlo al cuadrado?</p>
+  <div class='hint'>No. Se puede demostrar: la raíz del promedio de los cuadrados nunca es menor que el promedio de los valores absolutos. En el ejemplo, 2,16 &gt; 2,0.</div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Qué tan bien sigue el patrón</div>
-  <h2>r — correlación</h2>
+  <div class='slide-kicker'>El patrón</div>
+  <h2>r: correlación</h2>
   <div class="formula-box ">¿Sube cuando la observación sube y baja cuando baja? &nbsp;→&nbsp; <code>np.corrcoef(sim, obs)[0, 1]</code></div>
   <div class="slide-body top"><ul class='bullets'>
 <li>Va de −1 a 1. <strong>1</strong>: las dos curvas suben y bajan juntas; <strong>0</strong>: no tienen relación; <strong>−1</strong>: una sube cuando la otra baja.</li>
 <li>Solo mira la <strong>forma</strong> de la curva: no le importa si el modelo está más caliente o más frío.</li>
-<li>Ejemplo: si el modelo marca exactamente 3 °C más en cada hora (23, 21, 28), las curvas son idénticas en forma → <strong>r = 1</strong>, aunque el modelo esté 3 grados equivocado.</li>
-<li>Por eso r nunca va sola: hace falta una métrica que mire el sesgo.</li>
+<li>Si el modelo marca 3 °C más en cada hora (23, 21, 28), las curvas tienen la misma forma y <strong>r = 1</strong>, aunque el modelo se equivoque en 3 grados.</li>
+<li>Por eso r se reporta junto con una métrica de sesgo o de error.</li>
 </ul></div>
 </section>
 <section class="slide slide--check">
   <div class="icon">😬</div>
   <h2>¿Un modelo con r = 0.95 puede estar sistemáticamente mal?</h2>
   <p class="lead">¿r alto garantiza que el modelo es bueno?</p>
-  <div class='hint'>Sí puede estar mal: r solo mide patrón, no sesgo. Esta es la razón principal por la que ninguna métrica sola es suficiente.</div>
+  <div class='hint'>Sí: r mide el patrón, no el sesgo. Por eso se reportan varias métricas.</div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Tres revisiones en un solo número</div>
-  <h2>KGE — eficiencia de Kling-Gupta</h2>
+  <div class='slide-kicker'>Tres cosas en un número</div>
+  <h2>KGE: eficiencia de Kling-Gupta</h2>
   <div class="formula-box ">KGE = 1 cuando el modelo acierta las tres cosas a la vez; cuanto más baja, peor</div>
   <div class="slide-body top"><ul class='bullets'>
 <li><strong>¿Sigue el patrón?</strong> → r (ideal 1).</li>
 <li><strong>¿Acierta el promedio?</strong> → β = promedio del modelo ÷ promedio observado (ideal 1; 1.1 = sobreestima 10 %).</li>
-<li><strong>¿Acierta cuánto sube y baja?</strong> → α = variabilidad del modelo ÷ variabilidad observada (ideal 1; 0.5 = el modelo es "más plano").</li>
+<li><strong>¿Acierta cuánto sube y baja?</strong> → α = variabilidad del modelo ÷ variabilidad observada (ideal 1; 0,5 = el modelo varía la mitad).</li>
 <li>El KGE mide qué tan lejos están esas tres cosas de lo ideal. Si sale bajo, se mira r, β y α por separado para saber <strong>cuál</strong> falla.</li>
-<li>Puede ser negativo: no es un error de cálculo, es un ajuste malo.</li>
+<li>Puede salir negativo. Eso indica un ajuste malo, no un error de cálculo.</li>
 </ul></div>
 </section>
 <section class="slide slide--quote">
-  <blockquote>Como mínimo, siempre una medida de error absoluto (RMSE o MAE) y una medida de patrón (r o, mejor, KGE) juntas.</blockquote>
+  <blockquote>Como mínimo, reporten una métrica de error (RMSE o MAE) y una de patrón (r o KGE).</blockquote>
   
-  <div class="attrib">Nunca reportar una sola métrica — el hilo conductor de todo este módulo.</div>
+  <div class="attrib">Una sola métrica puede esconder el problema.</div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🧩</div>
   <h2>Antes de la práctica</h2>
-  <p class="lead">¿El modelo está sesgado? ¿Sigue bien el patrón diario? — son las dos preguntas que responderán hoy sobre su propia estación.</p>
+  <p class="lead">¿El modelo está sesgado? ¿Sigue bien el ciclo diario? Son las dos preguntas de hoy para su estación.</p>
   <div class='hint'>Con MAE/RMSE/bias (sesgo) y r/KGE (patrón).</div>
 </section>
 <section class="slide slide--transition">
   <div class="icon">💻</div>
   <h2>Pasamos a la práctica (3 h)</h2>
   <p class="lead">Notebooks: 01_teoria_demos.ipynb y 02_practica_dia8_metricas.ipynb</p>
-  <div class="slide-body top"><ol class="practice-list"><li><strong>Carga de observaciones</strong> de una estación de muestra con Pandas.</li><li><strong>Del WRF a la estación</strong>: punto de grilla más cercano, series alineadas.</li><li><strong>Implementar las 5 métricas</strong> como funciones propias (<code>metricas.py</code>).</li><li><strong>Caso de contraste</strong> — WRF y ERA5-Land fallan de formas opuestas: ¿qué lo revela?</li></ol></div>
+  <div class="slide-body top"><ol class="practice-list"><li><strong>Carga de observaciones</strong> de una estación de muestra con Pandas.</li><li><strong>Del WRF a la estación</strong>: punto de grilla más cercano, series alineadas.</li><li><strong>Implementar las 5 métricas</strong> como funciones propias (<code>metricas.py</code>).</li><li><strong>Caso de contraste</strong>: WRF y ERA5-Land fallan de formas opuestas: ¿qué lo revela?</li></ol></div>
 </section>
 <!-- bitacora -->
 <section class="slide">
@@ -349,7 +349,7 @@ jupyter lab</pre></div>
   <button id="prev">&larr;</button>
   <button id="next">&rarr;</button>
   <div class="counter" id="counter">1 / 1</div>
-  <div class="title">Día 8 — Interpolación y métricas de error (Módulo 5)</div>
+  <div class="title">Día 8 — Del WRF a la estación y métricas de error (Módulo 5)</div>
 </div>
 <script>
 (function(){
