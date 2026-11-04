@@ -16,8 +16,10 @@ con el mensaje de error completo (copiado como texto, no como foto).
 ## 2. Instalar Miniconda
 
 Sigue la [guía de instalación de Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install)
-para tu sistema. Al terminar, cierra y vuelve a abrir la terminal, y
-comprueba:
+para tu sistema. **En Windows con WSL2, instala la versión de Linux dentro
+de la terminal de Ubuntu**, no el instalador de Windows (`.exe`): el
+entorno del curso vive dentro de Ubuntu. Al terminar, cierra y vuelve a
+abrir la terminal, y comprueba:
 
 ```bash
 conda --version

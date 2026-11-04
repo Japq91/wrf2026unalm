@@ -246,8 +246,8 @@ table.cmp tr:nth-child(even) td { background: var(--gris-100); }
   <div class='hint'>Pista: piensen qué pasa el día que otro curso o proyecto necesite una versión distinta de la misma librería.</div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Práctica de hoy</div>
-  <h2>Instalación desde el repositorio del curso</h2>
+  <div class='slide-kicker'>Ya hecho en casa (antes_del_curso.md)</div>
+  <h2>Así se creó el entorno</h2>
   
   <div class="slide-body top"><pre class="code-block"><span class="c1"># 1. Clonar el repositorio del curso</span>
 git clone https://github.com/Japq91/wrf2026unalm.git
@@ -270,7 +270,7 @@ git pull</pre></div>
 conda env list
 
 <span class="c1"># no debe arrojar ningún error de import</span>
-python -c "import numpy, pandas, xarray, matplotlib; print('OK')"
+python -c "import xarray, cartopy, cfgrib, herbie, xwrf, cdsapi; print('entorno OK')"
 
 <span class="c1"># debe abrir usando el intérprete de wrf2026, no el de base</span>
 jupyter lab</pre></div>

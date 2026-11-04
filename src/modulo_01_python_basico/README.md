@@ -52,10 +52,11 @@ herramientas separada para cada proyecto: lo que se instala en una caja no
 toca a las demás. En el curso usamos una caja llamada `wrf2026`, distinta
 de `base` (la que trae Miniconda por defecto).
 
-**¿Por qué instalar desde `environment.yml`?** Porque es la lista exacta de
-librerías y versiones del curso: con un solo comando cada participante obtiene
-el mismo entorno con el que se probaron los notebooks, y se evitan los errores
-de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar).
+**¿Por qué instalar desde `environment.yml`?** Porque es la lista de
+librerías del curso, guardada en el repositorio: con un solo comando cada
+participante obtiene las mismas librerías, del mismo canal y con la misma
+versión de Python, y se evitan casi todos los errores de "a mí sí me
+funciona". Más detalle en [Para profundizar](#para-profundizar).
 
 **2. Tipos de datos y el modelo de variables en Python (~25 min)**
 - Tipos primitivos: `int`, `float`, `str`, `bool`. Un `float` no es exacto
@@ -100,22 +101,18 @@ de "a mí sí me funciona". Más detalle en [Para profundizar](#para-profundizar
 
 ### Práctica (3 h)
 
-1. **Instalación del entorno desde el repositorio del curso (30 min).**
-   Con Miniconda ya instalado (requisito previo del curso, comunicado
-   antes del inicio), cada participante clona el repositorio del curso y
-   crea el entorno a partir del
-   [`environment.yml`](../../environment.yml) versionado en la raíz del
-   repositorio, en vez de instalar librerías una por una:
+1. **Verificación del entorno (30 min).** El entorno ya viene creado de
+   casa: cada participante clonó el repositorio y ejecutó
+   `conda env create -f environment.yml` siguiendo la guía
+   [`antes_del_curso.md`](../../antes_del_curso.md). En clase solo se
+   comprueba que quedó bien y se aprovecha el tiempo para resolver los
+   casos que fallaron (quien no lo haya creado lo hace ahora con los pasos
+   de esa guía):
    ```bash
-   git clone https://github.com/Japq91/wrf2026unalm.git
    cd wrf2026unalm
-   conda env create -f environment.yml
    conda activate wrf2026
-   ```
-   Verificación de que el entorno quedó bien creado y activo:
-   ```bash
    conda env list        # wrf2026 debe aparecer marcado como el entorno activo
-   python -c "import numpy, pandas, xarray, matplotlib; print('OK')"
+   python -c "import xarray, cartopy, cfgrib, herbie, xwrf, cdsapi; print('entorno OK')"
    jupyter lab            # debe abrir usando el intérprete de wrf2026, no el de base
    ```
    **Al empezar cada clase**, trae el material nuevo del curso desde la
@@ -364,18 +361,22 @@ Material opcional: no hace falta para la práctica ni para el proyecto final.
 
 ### Por qué un `environment.yml` versionado
 
-`environment.yml` es una lista exacta y versionada de qué necesita el
-proyecto (nombre del entorno, canal de paquetes, cada librería y —cuando
-hace falta— su versión). Todo el material del curso (este repositorio
+`environment.yml` es una lista versionada de qué necesita el proyecto
+(nombre del entorno, canal de paquetes, cada librería y —cuando hace
+falta— su versión). Todo el material del curso (este repositorio
 `wrf2026unalm`) vive en GitHub, y ese archivo vive junto al código, no en la
 cabeza del instructor ni en una guía aparte. Esto tiene tres consecuencias
 prácticas, no solo de comodidad:
-- **Reproducibilidad:** el entorno que arma un participante el día 1 es
-  *exactamente* el mismo (mismas versiones) que el que usó el instructor
-  para preparar y probar cada notebook del curso. Instalar "a mano" paquete
-  por paquete casi garantiza pequeñas diferencias de versión entre
-  computadoras, que después se manifiestan como errores difíciles de
-  reproducir ("a mí sí me funciona").
+- **Reproducibilidad:** todos los participantes arman el entorno desde la
+  misma lista, del mismo canal (`conda-forge`) y con la misma versión de
+  Python. Las demás librerías no tienen versión fijada: conda instala la
+  más reciente compatible el día de la instalación, así que dos personas
+  que instalen con meses de diferencia pueden tener versiones algo
+  distintas. Aun así, es mucho más parejo que instalar "a mano" paquete por
+  paquete, que casi garantiza diferencias entre computadoras y errores
+  difíciles de reproducir ("a mí sí me funciona"). Para congelar las
+  versiones exactas de un proyecto propio se usa
+  `conda env export > environment.lock.yml`.
 - **Una sola fuente de verdad:** si el curso agrega una librería nueva
   (como pasó aquí con varias herramientas específicas de meteorología), el
   cambio se hace una vez en `environment.yml` dentro del repositorio, y
@@ -384,8 +385,8 @@ prácticas, no solo de comodidad:
 - **Onboarding de un solo comando:** en vez de una lista de instrucciones
   para copiar y pegar librería por librería (con riesgo de saltarse una o
   instalar la versión equivocada), la instalación completa se reduce a
-  clonar el repositorio y ejecutar `conda env create`, como se hace en la
-  práctica de este mismo día.
+  clonar el repositorio y ejecutar `conda env create`, como indica la guía
+  [`antes_del_curso.md`](../../antes_del_curso.md).
 
 ### Por qué `0.1 + 0.2 != 0.3`
 
