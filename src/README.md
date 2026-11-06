@@ -30,6 +30,9 @@ Cada módulo tiene cuatro notebooks en `notebooks/`:
 3. `03_..._practica...ipynb`: segunda parte de la práctica.
 4. `04_entregable_...ipynb`: el entregable del módulo.
 
+Algunos módulos agregan notebooks opcionales, que no se evalúan: `05_extension_...`
+(Módulos 3 y 5) y `06_metricas_complementarias.ipynb` (Módulo 5).
+
 En los Días 1 a 3, cada ejercicio tiene tres celdas seguidas:
 
 - **📘 Ejemplo resuelto:** lo ejecutas y lo lees.

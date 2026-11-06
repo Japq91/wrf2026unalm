@@ -245,6 +245,48 @@ misma observación. Requiere la extensión del Módulo 3, Día 5.
 
 ---
 
+## Métricas complementarias
+
+Material de apoyo del Día 9 (no evaluado), para validar con datos reales
+de semanas o meses. Las funciones del Día 8 suponen series completas y
+variables lineales; con datos reales faltan horas, hay datos malos, la
+dirección del viento es circular y la humedad del `wrfout` no viene como
+la mide la estación. El módulo
+[`notebooks/evaluacion.py`](notebooks/evaluacion.py) reúne lo que hace
+falta, y
+[`06_metricas_complementarias.ipynb`](notebooks/06_metricas_complementarias.ipynb)
+lo aplica a los datos del curso:
+
+| Problema | Funciones |
+|---|---|
+| Horas sin dato (NaN) | `pares_validos`, `resumen_metricas` (agrega el IOA de Willmott) |
+| Datos malos en la estación | `control_calidad` (fuera de rango, picos, valores trabados), `completitud` |
+| Humedad | `humedad_relativa_wrf` (desde `T2`, `Q2` y `PSFC`), `razon_mezcla`, `presion_por_altura` |
+| Dirección del viento | `velocidad_direccion` (con giro `SINALPHA`/`COSALPHA` para Lambert), `metricas_direccion` |
+| ¿El punto de grilla representa a la estación? | `revisar_emparejamiento` (distancia y altura), `corregir_t2_altura` |
+| ¿Es bueno o malo el resultado? | `BENCHMARKS`, `evaluar_benchmarks` |
+| `wrfout` grandes | `abrir_wrfout` deja solo las variables que se usan |
+
+Lo que muestra el notebook con los datos del curso:
+
+- `control_calidad` encuentra solo el dato dudoso de Lima-Callao que en el
+  Módulo 6 se busca a ojo (16/03/2025, 18:00 UTC). En las 5 estaciones de
+  SENAMHI no marca nada; la humedad de 100 % muchas horas seguidas no se
+  marca porque el aire saturado es normal de noche en la costa de Lima.
+- En dirección del viento, tratarla como lineal infla el error medio (67°
+  frente a 49° para el WRF), y con la cuenta circular los dos modelos
+  muestran un sesgo de −16° a −18°.
+- Con los criterios de Emery et al. (2001), el WRF no cumple el sesgo de
+  temperatura (+1,28 °C) ni el RMSE ni el IOA del viento;
+  ERA5-Land cumple en temperatura y velocidad. Ninguno cumple en
+  dirección.
+
+Los umbrales de `BENCHMARKS` son los de Emery et al. (2001) para terreno
+simple y los de Kemball-Cook et al. (2005) para terreno complejo, como
+Lima. Revísalos contra los artículos antes de citarlos en un informe.
+
+---
+
 ## Cierre del módulo
 
 **Pregunta de cierre:** sin mirar el notebook, ¿por qué un modelo puede
@@ -321,6 +363,12 @@ Con $s_i$ el valor simulado, $o_i$ el observado y $n$ pares:
 - KGE: $\text{KGE} = 1 - \sqrt{(r-1)^2 + (\beta-1)^2 + (\alpha-1)^2}$, con
   $\beta = \bar{s}/\bar{o}$ y $\alpha = \sigma_s/\sigma_o$. No tiene
   mínimo: puede ser muy negativo.
+- IOA (Willmott, 1981):
+  $d = 1 - \dfrac{\sum (s_i - o_i)^2}{\sum \left(|s_i - \bar{o}| + |o_i - \bar{o}|\right)^2}$.
+  Va de 0 a 1 y, a diferencia de $r$, baja también con el sesgo.
+- Diferencia de dirección del viento: $\Delta_i = ((s_i - o_i + 180) \bmod 360) - 180$,
+  en grados entre −180 y 180. El sesgo y el error medio se calculan sobre
+  $\Delta_i$, no sobre $s_i - o_i$.
 
 ### Diagrama de Taylor: la ley de cosenos
 
@@ -366,7 +414,8 @@ observación:
 - **Viento:** ninguno de los dos sigue bien el patrón horario (r entre
   0,18 y 0,37). Se valida la velocidad y no la dirección, porque la
   dirección es circular (359° y 1° están cerca) y `calcular_r` o
-  `calcular_kge` darían cualquier cosa.
+  `calcular_kge` darían cualquier cosa. La dirección se valida con la
+  diferencia circular, en [Métricas complementarias](#métricas-complementarias).
 - **Precipitación horaria:** `RAINC`/`RAINNC` del WRF y `tp` de ERA5-Land
   vienen acumulados (con reinicio diario) y se pasan a lluvia horaria con
   `.diff()`. Solo Salto reporta lluvia de 1 h (23 pares), y con esa
@@ -386,6 +435,17 @@ estaciones lo complementa.
   NSE performance criteria*. El origen del KGE.
 - Documentación de Pandas: *GroupBy* y *DataFrame*, para la tabla
   resumen.
+- Willmott, C. J. (1981), *On the validation of models*, Physical
+  Geography. El origen del IOA.
+- Emery, C., Tai, E. y Yarwood, G. (2001), *Enhanced meteorological
+  modeling and performance evaluation for two Texas ozone episodes*,
+  ENVIRON. Los criterios de desempeño para terreno simple.
+- Kemball-Cook, S. et al. (2005), *Alaska MM5 modeling for the 2002 annual
+  period to support visibility modeling*, ENVIRON. Los criterios para
+  terreno complejo.
+- Bolton, D. (1980), *The computation of equivalent potential
+  temperature*, Monthly Weather Review. La fórmula de presión de vapor de
+  saturación.
 
 ## Siguiente módulo
 
