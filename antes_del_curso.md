@@ -41,15 +41,51 @@ Hazla con buena conexión.
 ```bash
 conda activate wrf2026
 python -c "import xarray, cartopy, cfgrib, herbie, xwrf, cdsapi; print('entorno OK')"
+python -m ipykernel install --user --name wrf2026 --display-name "Python (wrf2026)"
 jupyter lab
 ```
 
-Debe imprimir `entorno OK` y abrirse Jupyter en el navegador. Abre
+Debe imprimir `entorno OK` y abrirse Jupyter en el navegador. La tercera
+línea registra el entorno como **kernel** de Jupyter: el «motor» que ejecuta
+las celdas. Los notebooks del curso ya vienen configurados para usar el
+kernel `Python (wrf2026)`; si Jupyter te pide elegir uno, elige ese (se ve
+arriba a la derecha de cada notebook). Abre
 `src/modulo_01_python_basico/notebooks/01_teoria_demos.ipynb` y ejecuta la
 primera celda (Shift+Enter): si muestra `0.1 + 0.2 = 0.30000000000000004`,
 Jupyter funciona (ese número raro es justamente el tema de esa celda).
 
-## 5. Crear tu cuenta de Copernicus (para el Día 4)
+## 5. Configurar Git y tu forma de guardar el trabajo
+
+Git es el programa que usaste para descargar el curso (`git clone`). Antes
+de cada clase traerás el material nuevo con `git pull`, y el Día 10 harás
+tu propio repositorio. Para eso Git necesita saber quién eres (una sola vez
+por computadora):
+
+```bash
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu_correo@ejemplo.com"
+```
+
+Sin esto, `git commit` falla con el mensaje *Author identity unknown*.
+
+**Regla para no perder trabajo ni bloquear `git pull`:** no guardes tus
+cambios encima de los notebooks del curso. Cuando abras uno, haz primero
+*File → Save Notebook As…* y agrega `_mio` al nombre, en la **misma
+carpeta** (por ejemplo `02_practica_dia1_mio.ipynb`). Así las rutas a
+`data/` siguen funcionando, tu copia no la toca `git pull` y Git no la
+muestra como cambio pendiente.
+
+Si aun así `git pull` responde *Please commit your changes or stash them
+before you merge*, es porque modificaste un archivo del curso. Para traer
+la versión nueva sin perder lo tuyo:
+
+```bash
+git stash          # aparta tus cambios
+git pull           # trae el material nuevo
+git stash pop      # vuelve a poner tus cambios (si chocan, avisa al docente)
+```
+
+## 6. Crear tu cuenta de Copernicus (para el Día 4)
 
 El Día 4 se descarga ERA5 del Copernicus Climate Data Store. Hace falta una
 cuenta personal, y **la activación puede tardar**:
@@ -67,7 +103,7 @@ ahora basta con tener la cuenta activa y las licencias aceptadas.
 
 Los datos de GFS y FNL se descargan sin cuenta.
 
-## 6. Repasar la terminal (si hace falta)
+## 7. Repasar la terminal (si hace falta)
 
 El curso asume que sabes moverte por carpetas en la terminal. Si dudas,
 comprueba que puedes hacer esto sin buscar ayuda:
@@ -86,7 +122,8 @@ antes de empezar; en clase se usa todo el tiempo.
 
 - [ ] `conda --version` responde.
 - [ ] `conda activate wrf2026` funciona y la prueba imprime `entorno OK`.
-- [ ] Jupyter abre y la primera celda del Módulo 1 corre sin error.
+- [ ] Jupyter abre con el kernel `Python (wrf2026)` y la primera celda del Módulo 1 corre sin error.
+- [ ] `git config --global user.name` responde con tu nombre.
 - [ ] Cuenta de Copernicus activa y las 3 licencias de ERA5 aceptadas.
 - [ ] Te mueves por carpetas en la terminal sin problema.
 - [ ] Respondiste la encuesta diagnóstica que envió el docente.

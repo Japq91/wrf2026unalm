@@ -56,6 +56,10 @@ def _pedido_era5(fecha_inicio, fecha_fin, area, variables, extra, destino):
     if os.path.exists(destino):
         return destino
     dias = pd.date_range(fecha_inicio, fecha_fin, freq="D")
+    if len(dias) == 0:
+        raise ValueError(f"fecha_fin ({fecha_fin}) es anterior a fecha_inicio ({fecha_inicio}).")
+    if (dias[0].year, dias[0].month) != (dias[-1].year, dias[-1].month):
+        raise ValueError("El periodo cruza de un mes a otro: CDS necesita un pedido por mes.")
     horas = [f"{h:02d}:00" for h in range(0, 24, 6)]
     peticion = {
         "product_type": "reanalysis",

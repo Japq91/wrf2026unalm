@@ -1,6 +1,6 @@
 # Estaciones automáticas de SENAMHI — Lima, marzo de 2025
 
-Datos **reales** de temperatura, precipitación, humedad y viento, cada hora,
+Datos de temperatura, precipitación, humedad y viento, cada hora,
 de 5 estaciones meteorológicas automáticas (EMA) del SENAMHI en Lima.
 Se usan en el Módulo 1 (primeros ejercicios con datos), en el Módulo 3
 (cuarta fuente y verificación de integridad) y en el caso Lima del Módulo 6.

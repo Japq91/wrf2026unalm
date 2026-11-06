@@ -182,33 +182,33 @@ jupyter lab</pre></div>
 </section>
 <section class="slide slide--quote">
   <blockquote>Una descarga puede <em>terminar</em> sin haber tenido éxito.</blockquote>
-  <p class='context'>"Terminar" en el sentido de que el proceso deja de ejecutarse, sin arrojar ningún error visible — pero el archivo resultante puede estar incompleto, corrupto, o no ser el que se pidió.</p>
-  <div class="attrib">Hoy aprendemos a no confiar en que "se ve bien" sea suficiente criterio.</div>
+  <p class='context'>El proceso se detiene sin mostrar error, pero el archivo puede estar incompleto, dañado o no ser el que pedimos.</p>
+  <div class="attrib">Hoy escribimos los controles para detectarlo.</div>
 </section>
 <section class="slide slide--section">
   <div class="slide-body">
     <div class="num">1</div>
-    <h2>Qué significa "integridad"</h2>
-    <p class="lead">Tres controles en capas: barato primero, costoso después</p>
+    <h2>Qué significa integridad</h2>
+    <p class="lead">Tres controles, del más rápido al más lento</p>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Formas de fallar sin que se note</div>
-  <h2>Descargas que "terminan" mal</h2>
+  <div class='slide-kicker'>Fallas que no se ven</div>
+  <h2>Descargas que terminan mal</h2>
   
   <div class="slide-body top"><ul class='bullets'>
 <li>Una conexión interrumpida deja un archivo <strong>truncado</strong>.</li>
-<li>Una solicitud mal formada devuelve un archivo de <strong>error</strong>, no datos.</li>
-<li>Una variable solicitada simplemente <strong>no existe</strong> en la fuente para esa fecha.</li>
+<li>Una solicitud mal escrita devuelve un archivo con un mensaje de <strong>error</strong> en vez de datos.</li>
+<li>La variable pedida <strong>no existe</strong> en esa fuente para esa fecha.</li>
 </ul></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Verificación en capas</div>
+  <div class='slide-kicker'>Los controles</div>
   <h2>Tres controles encadenados</h2>
   <div class="two-col wide-right"><div class="col-box acc-azul"><h3>1. Tamaño y existencia</h3><ul class='bullets'>
-<li>El archivo existe y su tamaño supera un umbral mínimo razonable</li>
+<li>El archivo existe y pesa más que un mínimo</li>
 </ul></div><div class="col-box acc-teal"><h3>2. Apertura sin error</h3><ul class='bullets'>
-<li>Abre con Xarray/cfgrib sin excepción — un archivo truncado falla aquí</li>
+<li>Se abre con Xarray o cfgrib sin error. Un archivo truncado falla aquí</li>
 </ul></div></div>
 </section>
 <section class="slide">
@@ -216,9 +216,9 @@ jupyter lab</pre></div>
   <h2>3. Cobertura esperada</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Las dimensiones del <code>Dataset</code> resultante (fechas, área, variables) coinciden con lo solicitado.</li>
-<li>Si se pidieron 7 días y el archivo solo cubre 3, algo falló silenciosamente en la solicitud.</li>
-<li>El orden importa: primero lo rápido (mirar si existe y cuánto pesa), al final lo lento (abrirlo y revisar su contenido).</li>
+<li>Las fechas, el área y las variables del <code>Dataset</code> coinciden con lo que pedimos.</li>
+<li>Si pedimos 7 días y llegaron 3, algo falló sin aviso.</li>
+<li>Se revisan en este orden: primero lo rápido (si existe y cuánto pesa), al final lo lento (abrirlo y revisar el contenido).</li>
 </ul></div>
 </section>
 <section class="slide">
@@ -234,14 +234,14 @@ jupyter lab</pre></div>
 <section class="slide slide--check">
   <div class="icon">🧭</div>
   <h2>Pandas leyó el archivo de Ceres sin ningún error. La humedad dice 27.74 %. ¿Le creemos?</h2>
-  <p class="lead">Un caso real de este curso: Ceres no tiene sensor de humedad.</p>
-  <div class='hint'>No: el encabezado traía 9 nombres y las filas 8 valores. La «humedad» es en realidad la dirección del viento. Pandas no avisa; el control 2 sí.</div>
+  <p class="lead">Nos pasó preparando el curso: Ceres no tiene sensor de humedad.</p>
+  <div class='hint'>No. El encabezado traía 9 nombres y las filas 8 valores: esa «humedad» es la dirección del viento. Pandas no avisa; el control 2 sí.</div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🔎</div>
-  <h2>Al bajar un programa, a veces se compara su “huella digital” (<em>checksum</em>). ¿Por qué aquí no?</h2>
-  <p class="lead">Piensen con qué la compararíamos.</p>
-  <div class='hint'>Ni el CDS ni los depósitos de GFS publican esa huella de forma simple: no hay con qué comparar. Por eso revisamos el archivo nosotros mismos.</div>
+  <h2>Al bajar un programa a veces se compara su <em>checksum</em>. ¿Por qué aquí no?</h2>
+  <p class="lead">Piensen con qué lo compararíamos.</p>
+  <div class='hint'>Ni el CDS ni los servidores de GFS publican un checksum fácil de usar. Por eso revisamos el archivo nosotros.</div>
 </section>
 <section class="slide">
   <div class='slide-kicker'>En código</div>
@@ -267,12 +267,12 @@ jupyter lab</pre></div>
   </div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Conveniencia, no requisito del WRF</div>
+  <div class='slide-kicker'>Una decisión del curso</div>
   <h2>Convertir todo a NetCDF apenas se descarga</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Si cada script tuviera que saber leer NetCDF <strong>y</strong> GRIB, todo sería el doble de complicado. Con un solo formato, Python trabaja siempre igual.</li>
-<li><strong>Ojo:</strong> es una comodidad para el análisis en Python del curso, <strong>no</strong> algo que el WRF exija.</li>
+<li>Si cada script tuviera que leer NetCDF <strong>y</strong> GRIB, habría que escribir todo dos veces. Con un solo formato, el código es el mismo.</li>
+<li>Lo hacemos para trabajar más cómodos en Python. El WRF no lo pide.</li>
 <li>El WRF tiene su propio preprocesador (<strong>WPS</strong>), que lee GRIB directamente.</li>
 </ul></div>
 </section>
@@ -280,23 +280,23 @@ jupyter lab</pre></div>
   <div class="slide-body">
     <div class="num">3</div>
     <h2>Organización de archivos</h2>
-    <p class="lead">Una convención simple que se retoma en el Módulo 6</p>
+    <p class="lead">La misma que usaremos en el Módulo 6</p>
   </div>
 </section>
 <section class="slide">
   <div class='slide-kicker'>Convención de nombres</div>
-  <h2>Codificar fuente y rango temporal en la ruta</h2>
+  <h2>La fuente y las fechas, en la ruta</h2>
   
   <div class="slide-body top"><pre class="code-block">datos/entrada/era5/2026-01-15_2026-01-21.nc
 datos/entrada/gfs/2026-07-20_f06.nc</pre></div>
 </section>
 <section class="slide">
-  <div class='slide-kicker'>Por qué importa</div>
-  <h2>Evitar sobrescrituras silenciosas</h2>
+  <div class='slide-kicker'>Para qué</div>
+  <h2>Que una descarga no borre otra</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li>Un nombre genérico (<code>datos.nc</code>) se sobrescribe entre descargas distintas sin avisar — si hoy se descarga ERA5 de enero y mañana de febrero, ambas veces a <code>datos.nc</code>, la segunda descarga borra la primera sin que nadie lo note.</li>
-<li>Codificar fuente + rango temporal en la ruta hace que cada archivo sea identificable de un vistazo, incluso meses después, sin tener que abrirlo para saber qué contiene.</li>
+<li>Si hoy guardamos ERA5 de enero en <code>datos.nc</code> y mañana febrero con el mismo nombre, el segundo archivo reemplaza al primero sin aviso.</li>
+<li>Con la fuente y las fechas en la ruta, meses después se sabe qué es cada archivo sin abrirlo.</li>
 </ul></div>
 </section>
 <section class="slide slide--section">
@@ -324,22 +324,22 @@ datos/entrada/gfs/2026-07-20_f06.nc</pre></div>
   <h2>try/except en vez de un fallo críptico</h2>
   
   <div class="slide-body top"><ul class='bullets'>
-<li><code>try</code>: «intenta esto». <code>except</code>: «si falla, haz esto otro» (por ejemplo, avisar) en vez de detener todo con un mensaje incomprensible.</li>
-<li>Cada etapa dice con claridad si falló y por qué.</li>
-<li>Es lo mismo del Módulo 1 (funciones, <code>if</code>/<code>return</code>), ahora en un caso real.</li>
+<li><code>try</code>: «intenta esto». <code>except</code>: «si falla, haz esto otro», por ejemplo avisar qué pasó en vez de detenerse con un mensaje difícil de entender.</li>
+<li>Cada etapa dice si falló y por qué.</li>
+<li>Son las funciones, <code>if</code> y <code>return</code> del Módulo 1, aplicados a las descargas.</li>
 </ul></div>
 </section>
 <section class="slide slide--check">
   <div class="icon">🧩</div>
   <h2>Checkpoint de cierre del Módulo 3</h2>
-  <p class="lead">Para "simular una helada en la sierra sur la próxima semana" — ¿qué fuente corresponde y por qué?</p>
+  <p class="lead">Para simular una helada en la sierra sur la próxima semana, ¿qué fuente usarían y por qué?</p>
   <div class='hint'>Evento futuro → GFS/Herbie. Evento ya ocurrido → ERA5/cdsapi.</div>
 </section>
 <section class="slide slide--transition">
   <div class="icon">💻</div>
   <h2>Pasamos a la práctica (3 h)</h2>
   <p class="lead">Notebooks: 03_practica_dia5_integridad.ipynb y 04_entregable_integrador.ipynb</p>
-  <div class="slide-body top"><ol class="practice-list"><li><strong>Implementar</strong> <code>verificar_integridad()</code> con los tres controles.</li><li><strong>Provocar 4 fallos reales</strong> — uno por cada control (truncado, cobertura insuficiente, archivo casi vacío, ruta inexistente).</li><li><strong>Integridad de un CSV de SENAMHI</strong> — <code>verificar_csv_senamhi()</code>: horas que faltan, <code>S/D</code> y columnas corridas.</li><li><strong>Conversión y organización</strong> — GFS, ERA5 <strong>y FNL</strong> (las 3 fuentes de modelo) → NetCDF, + reverificar integridad de lo ya organizado.</li><li><strong>Función integradora</strong> <code>obtener_entrada_wrf()</code>, ejecutada de punta a punta sobre un caso nuevo.</li><li><strong>Extensión opcional, no evaluada</strong> (<code>05_extension_opcional_peru.ipynb</code>) — aplicar <code>obtener_entrada_wrf()</code> a un caso nuevo real: ERA5-Land para el área de las 7 estaciones de Perú.</li></ol></div>
+  <div class="slide-body top"><ol class="practice-list"><li><strong>Implementar</strong> <code>verificar_integridad()</code> con los tres controles.</li><li><strong>Provocar 4 fallas</strong>: una por cada control (truncado, cobertura insuficiente, archivo casi vacío, ruta inexistente).</li><li><strong>Integridad de un CSV de SENAMHI</strong>: <code>verificar_csv_senamhi()</code>: horas que faltan, <code>S/D</code> y columnas corridas.</li><li><strong>Conversión y organización</strong>: GFS, ERA5 <strong>y FNL</strong> (las 3 fuentes de modelo) a NetCDF, y volver a verificar lo ya organizado.</li><li><strong>Función integradora</strong> <code>obtener_entrada_wrf()</code>, ejecutada de punta a punta sobre un caso nuevo.</li><li><strong>Extensión opcional, no evaluada</strong> (<code>05_extension_opcional_peru.ipynb</code>): <code>obtener_entrada_wrf()</code> con ERA5-Land para el área de las 7 estaciones de Perú.</li></ol></div>
 </section>
 <!-- bitacora -->
 <section class="slide">

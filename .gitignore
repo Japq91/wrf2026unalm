@@ -46,3 +46,11 @@ docente/
 src/**/notebooks/*.png
 src/**/notebooks/validacion_*.csv
 src/**/notebooks/ceres_como_se_descargo.csv
+
+# Copias de trabajo de los participantes (ver antes_del_curso.md, sección 5)
+*_mio.ipynb
+*_mio.py
+
+# Productos que generan los notebooks del Módulo 1
+src/**/notebooks/clasificar_precipitacion.py
+src/**/notebooks/entregable_modulo1_resumen.csv

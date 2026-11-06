@@ -49,6 +49,9 @@ y hoy preparan o revisan sus datos a mano.
 para instalar el entorno y crear tu cuenta de Copernicus. La cuenta puede
 tardar en activarse y sin ella no se puede hacer la práctica del Día 4.
 
+Si nunca programaste, ten a mano el [`glosario.md`](glosario.md): explica
+cada término nuevo (lista, función, kernel, `DataFrame`, NaN…) en una línea.
+
 ## Cómo empezar
 
 1. Clona el repositorio:
@@ -74,6 +77,7 @@ tardar en activarse y sin ella no se puede hacer la práctica del Día 4.
 | [`src/`](src/) | Los 6 módulos: cada uno con su `README.md` (teoría y práctica) y sus notebooks. |
 | [`data/`](data/) | Datos reales de muestra (recortes de `wrfout`, ERA5, estaciones) y scripts de descarga. Ver [`data/README.md`](data/README.md). |
 | [`pipeline_curso_python_wrf.md`](pipeline_curso_python_wrf.md) | El flujo técnico completo del curso, de la descarga a la validación. |
+| [`glosario.md`](glosario.md) | Los términos de Python y de datos del curso, explicados para quien nunca programó. |
 
 ## Plan de clases
 
